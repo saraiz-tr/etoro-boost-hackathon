@@ -7,7 +7,7 @@ const DashboardComponent: React.FC = () => {
 
   useEffect(() => {
     const username = getLoginData()?.username;
-    fetch(`http://localhost:4000/api/getSuggestedPosts?userId=${username}`)
+    fetch(`http://localhost:4000/api/getSuggestedPosts?userName=${username}`)
       .then(response => response.json())
       .then(data => {
         console.log("result", data);
