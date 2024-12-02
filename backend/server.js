@@ -183,12 +183,16 @@ app.post('/api/postsOnEtoro', async(req, res) => {
 
 app.get('/api/getSuggestedPosts', async(req, res) => {
   const userName = req.query.userName;
+  if (userName === undefined) {
+    res.json({ error: "Invalid input: userName"});
+    return;
+  }
   let result = [];
   try {
     const portfolioData = await fetchPortfolioData(userName);   
     const positionsText = portfolioData?.positions.map((pos) => {
       const symbol = (instruments).find((element) => element.instrumentId === pos.instrumentId);
-      return `${symbol?.ticker},`;
+      return `${symbol?.ticker}`;
     });
 
     const positionsPrompt = (positionsText !== undefined) ? ` This is my portfilio percent allocation per asset: ${positionsText.join(', ')}` : "";
