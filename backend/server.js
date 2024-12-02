@@ -15,10 +15,13 @@ const USE_AI = AIType.AzureOpenAI;
 let instruments = [];
 
 const app = express();
+const authRoutes = require('./routes/auth');
+
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api', authRoutes);
 
 app.get('/', (req, res) => {
   res.json('hello etoro boost');
