@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { LoginModal } from '../LoginModalComponent/LoginModal';
-//import { EToroLogo } from './components/icons/EToroLogo';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../styles/style.css';
 import { useNavigate } from 'react-router-dom';
+import { setLoginData } from '../../services/LoginData';
 
 export const Login = () => {
   const [showEtoroModal, setShowEtoroModal] = useState(false);
   const [etoroLoggedIn, setEtoroLoggedIn] = useState(false);
-  const [loginData, setLoginData] = useState({} as LoginData);
   const navigate = useNavigate();
 
   const goToDashboard = () => {
