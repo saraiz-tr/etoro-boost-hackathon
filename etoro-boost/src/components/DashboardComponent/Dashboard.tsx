@@ -15,6 +15,34 @@ const DashboardComponent: React.FC = () => {
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]); // Allow multiple selections
   const navigate = useNavigate();
+  const username = getLoginData()?.username;
+  const loginData = getLoginData();
+
+  const postToX = (post: any) => {
+    fetch('http://localhost:4000/api/postOnX', { 
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json'
+      }, 
+      body: JSON.stringify({
+        content: post
+      })
+    })    
+  };
+
+  const postToEtoro = (post: any) => {
+
+    fetch(`http://localhost:4000/api/postsOnEtoro?username=${username}`, { 
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json'
+      }, 
+      body: JSON.stringify({
+        content: post,
+        loginData
+      })
+    })    
+  }
 
   useEffect(() => {
     // Check if user is authenticated
@@ -24,10 +52,10 @@ const DashboardComponent: React.FC = () => {
       return;
     }
 
-    const username = getLoginData()?.username;
-    fetch(`/api/getSuggestedPosts?userId=${username}`)
-      .then((response) => response.json())
-      .then((data) => {
+    
+    fetch(`/api/getSuggestedPosts?userName=${username}`)
+      .then(response => response.json())
+      .then(data => {
         console.log("result", data);
         setData(data.result); // Store the result in state
         setLoading(false); // Set loading to false after fetching data
@@ -44,13 +72,24 @@ const DashboardComponent: React.FC = () => {
     setShowModal(true); // Show the modal for editing
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (tweetIndex !== null) {
       // setData((prevData) =>
       //   prevData.map((tweet, index) =>
       //     index === tweetIndex ? selectedTweet : tweet,
       //   ),
       // );
+    }
+
+    const isxSelected = selectedPlatforms.includes('X')
+    const iseToroSelected = selectedPlatforms.includes('eToro')
+
+    if (isxSelected) {
+      await postToX(selectedTweet);
+    }
+
+    if (iseToroSelected) {
+      await postToEtoro(selectedTweet);
     }
     setShowModal(false); // Close the modal
   };

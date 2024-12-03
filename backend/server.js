@@ -1,38 +1,105 @@
 require("dotenv-safe").config();
+const passport = require("passport");
 const axios = require('axios');
 const express = require('express');
 const path = require('path');
 const { v4: uuidv4 } = require("uuid");
 const cors = require('cors');
+const bodyParser = require("body-parser");
 const port = process.env.PORT || 4000;
-const AIType = Object.freeze({
-  AZURE_OPENAI: 'AzureOpenAI',
-  XAI: 'XAI',
-});
+const TwitterStrategy = require("passport-twitter").Strategy;
+const session = require("express-session");
+const { TwitterApi } = require('twitter-api-v2');
+const AIType = {
+	AzureOpenAI: "AzureOpenAI",
+	XAI: "XAI"
+}
+
 const USE_AI = AIType.AzureOpenAI;
 let instruments = [];
 
 const app = express();
 const authRoutes = require('./routes/auth');
 
-app.use(cors());
+let mapUserToToken = {}; // TODO fix!!
+
+app.use(cors({ origin: "http://localhost:3001", credentials: true }));
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api', authRoutes);
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
   res.json('hello etoro boost');
 });
 
-async function fetchPortfolioData(userId) {
+// Middleware setup
+app.use(session({
+  secret: process.env.X_ACCESS_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+})
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+const { X_API_KEY, X_API_SECRET, CALLBACK_URL } = process.env;
+passport.use(new TwitterStrategy(
+    {
+      consumerKey: X_API_KEY,
+      consumerSecret: X_API_SECRET,
+      callbackURL: CALLBACK_URL
+    },
+    (token, tokenSecret, profile, done) => {
+      // Store user profile for session
+      return done(null, { profile, token, tokenSecret });
+    }
+  )
+);
+
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
+
+
+
+app.get("/auth/twitter", passport.authenticate("twitter"));
+
+app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedirect: "/" }),
+  async (req, res) => {
+    try {
+      const user = req.user.profile.displayName;
+      mapUserToToken = {};
+      mapUserToToken[req.session.id] = {
+        token: req.user.token,
+        tokenSecret: req.user.tokenSecret
+      }
+      res.redirect("http://localhost:3001/dashboard");
+    } catch (err) {
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+// Example route to get current user info
+app.get("/auth/user", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ error: "Unauthorized" });
+  }
+});
+
+async function fetchPortfolioData(userName) {
   try {
-    const portfolioSummaryResponse = await axios.get(`${process.env.ETORO_API_URL}API/User/V1/${userId}/PortfolioSummary`,
+    const portfolioSummaryResponse = await axios.get(`${process.env.ETORO_API_URL}API/User/V1/${userName}/PortfolioSummary`,
       { headers: { 'Ocp-Apim-Subscription-Key': process.env.ETORO_API_KEY } }
     );
     return portfolioSummaryResponse.data;
   } catch (e) {
-    throw new Error(`Failed to fetch portfolio data for ${userId}: `, e.message);
+    console.log(`Failed to fetch portfolio data for ${userName}: `, e.message);
+    return null;
   }
 }
 
@@ -54,7 +121,7 @@ async function getGCID(username) {
 
 async function getEtoroFeedByLoginDetails(loginDetails) { 
   const subscriptionKey = "031656c593ef4e2499d9a2e19d561d4c";
-  const userId = loginDetails.demoCustomerId;// deep news "24563762";
+  const userId = loginDetails.realCustomerId;
   const path = `user%2Ftop%2F${userId}?requesterUserId=${userId}%26take=10%26offset=0%26reactionsPageSize=10`;
   const url = `${process.env.ETORO_API_URL}api/feeds/v1/feed?subscription-key=${subscriptionKey}&path=${path}`
  
@@ -78,14 +145,14 @@ async function getEtoroFeedByLoginDetails(loginDetails) {
 }
 
 async function postOnEtoroFeedByLoginDetails(loginDetails, body) {   
-  const url = `${process.env.ETORO_API_URL}api/feeds/v1/feed?path=discussion`
+  const url = `${process.env.ETORO_API_URL}api/feeds/v1/feed?path=discussion&subscription-key=${process.env.ETORO_API_KEY}`
   return await axios.post(url,
     body,
     {
       headers: {
         'Ocp-Apim-Subscription-Key': process.env.ETORO_API_KEY,
-        'x-token': loginDetails[`x-token`],
-        'x-csrf-token': loginDetails[`x-csrf-token`] 
+        'x-token': loginDetails[`token`],
+        'x-csrf-token': loginDetails[`xCsrfToken`] 
       }
     }
   )
@@ -116,7 +183,7 @@ async function getEtoroFeedByGCID(gcid) {
 }
 
 app.get('/api/getPostsFromEtoro', async(req, res) => {
-  const userName = req.query.userId;
+  const userName = req.query.username;
   const password = req.query.password;
   try {
     const gcid = await getGCID(userName);
@@ -132,12 +199,12 @@ app.get('/api/getPostsFromEtoro', async(req, res) => {
 });
 
 app.post('/api/postsOnEtoro', async(req, res) => {
-  const userName = req.query.userId;
-  const loginDetails = req.query.loginDetails; //await loginEtoroAccount(userName, password);
+  const userName = req.query.username;
+  const loginDetails = req.body.loginData;
 
   try {  
     const gcid = await getGCID(userName);
-    const content  = req.body.content;
+    const content = req.body.content;
     let body = {};
     
     if (content?.includes("Poll Time!")) {
@@ -166,7 +233,8 @@ app.post('/api/postsOnEtoro', async(req, res) => {
     } else {
       body = {
         owner: gcid,
-        message: content
+        message: content,
+        attachments: []
       }
     }
     
@@ -179,20 +247,24 @@ app.post('/api/postsOnEtoro', async(req, res) => {
 });
 
 app.get('/api/getSuggestedPosts', async(req, res) => {
-  const userId = req.query.userId;
+  const userName = req.query.userName;
+  if (userName === undefined) {
+    res.json({ error: "Invalid input: userName"});
+    return;
+  }
   let result = [];
   try {
-    const portfolioData = await fetchPortfolioData(userId);   
-    const positionsText = portfolioData.positions.map((pos) => {
+    const portfolioData = await fetchPortfolioData(userName);   
+    const positionsText = portfolioData?.positions.map((pos) => {
       const symbol = (instruments).find((element) => element.instrumentId === pos.instrumentId);
-      return `${symbol?.ticker}: ${pos.valuePctUnrealized}`;
+      return `${symbol?.ticker}`;
     });
-  
+
+    const positionsPrompt = (positionsText !== undefined) ? ` This is my portfilio percent allocation per asset: ${positionsText.join(', ')}` : "";
     const prompt = `Create 5 engaging and concise tweets for traders or investors audience about the latest assets. 
     Use an enthusiastic and professional tone, include 1-2 cashtags per post, and aim to spark conversations Make the text eye-catching. 
     The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours. 
-    try to generate at least one poll about market changes. add @eToro in the end of each post.
-    This is my portfilio percent allocation per asset: ${positionsText.join(', ')}`;
+    try to generate at least one poll about market changes. add @eToro in the end of each post.${positionsPrompt}`;
     // const transformedText = await transformTextByOpenAI(prompt);
     let response;
     switch (USE_AI) {
@@ -272,7 +344,7 @@ app.get('/api/getSuggestedPosts', async(req, res) => {
     res.json({ error: error.message });
     return;
   }
-  console.log(`Suggested Posts Based On ${userId} Portfolio: \n${result}`);
+  console.log(`Suggested Posts Based On ${userName} Portfolio: \n${result}`);
   result.forEach(res => console.log(res));
   res.json({ result });
 });
@@ -286,11 +358,24 @@ app.get('/api/getTweetsFromX', async(req, res) => {
   let result = [];
   const { token, tokenSecret } = req.user;
   try {
+    // if (!req.isAuthenticated()) { TODO
+    //   res.status(401).json({ error: "Unauthorized" });
+    //   return;
+    // } else {
+    //   res.json(req.user);
+    // }
+
+    const key = Object.keys(req.sessionStore.sessions)[0];
+    const accessToken = mapUserToToken[key].token;
+    const accessSecret = mapUserToToken[key].tokenSecret;
+
+    // const xToken = res.req.session.passport.user.token;
+    // const xTokenSecret = res.req.session.passport.user.tokenSecret;
     const client = new TwitterApi({
-      appKey: TWITTER_API_KEY,
-      appSecret: TWITTER_API_SECRET,
-      accessToken: token,
-      accessSecret: tokenSecret,
+      appKey: X_API_KEY,
+      appSecret: X_API_SECRET,
+      accessToken,
+      accessSecret,
     });
 
     const tweets = await client.v2.userTimelineByUsername(username, {
@@ -317,6 +402,74 @@ app.get('/api/getTweetsFromX', async(req, res) => {
     return;
   }
   res.json({ result });
+});
+
+app.post('/api/postOnX', async(req, res) => {
+  const content = req?.body?.content;
+  if (content === undefined || content === "" || content === null) {
+    res.json({ result: "Invalid content"});
+  }
+  try {
+    let accessToken, accessSecret;
+
+    const key = Object.keys(req.sessionStore.sessions)[0];
+    accessToken = mapUserToToken[key].token;
+    accessSecret = mapUserToToken[key].tokenSecret;
+
+    // if (req.isAuthenticated()) {
+    //   xToken = res.req.session.passport.user.token;
+    //   xTokenSecret = res.req.session.passport.user.tokenSecret;
+    //   // res.json(req.user);
+    // } else {
+    //   res.status(401).json({ error: "Unauthorized" });
+    //   return;
+    // }
+    const client = new TwitterApi({
+      appKey: X_API_KEY,
+      appSecret: X_API_SECRET,
+      accessToken,
+      accessSecret
+    });
+    let response;
+    if (content?.includes("Poll Time!")) {
+      const contentSplit = content?.split(`\r\n   - `);
+      const text = contentSplit[0];
+      const options = contentSplit?.slice(1, contentSplit.length);
+      response = client.v2.tweet({
+          text,
+          poll: {
+            duration_minutes: 1440, // Poll duration in minutes (maximum is 1440 minutes / 24 hours)
+            options
+          },
+        })
+        .then((response) => {
+          res.send(`Tweeted: ${response.data.text}`);
+          return "success";
+        })
+        .catch((err) => {
+          res.status(500).send(`Error: ${err.message}`);
+          return "failed";
+        });
+    } else {
+      response = client.v2.tweet(content)
+      .then((response) => {
+        // res.send(`Tweeted: ${response?.data?.text}`);
+        return "success";
+      })
+      .catch((err) => {
+        // res.status(500).send(`Error: ${err.message}`);
+        // res.send(`failed`); // TODO 
+        return "failed";
+      });
+    }
+
+    console.log('Tweet created:', response);
+    res.json({ result: response});
+  } catch (error) {
+    const errMsg = `Error creating tweet: ${error.response?.data ? JSON.stringify(error.response?.data) : JSON.stringify(error.message)}`;
+    console.error(errMsg);
+    res.json({ result: errMsg });
+  }
 });
 
 app.listen(port, async() => {
