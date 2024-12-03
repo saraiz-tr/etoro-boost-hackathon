@@ -1,0 +1,85 @@
+.tweets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.tweet-card {
+    background-color: #343a40; /* Darker background for tweet cards */
+    border-radius: 10px;
+    color: white; /* Ensure text color is white */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s;
+}
+
+.tweet-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+}
+
+.btn-grey {
+    background-color: grey; /* Grey background color */
+    color: white; /* White text color */
+    border-radius: 10px; /* Rounded edges */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.btn-light-green {
+    background-color: lightgreen; /* Light green background when selected */
+    color: white; /* White text color */
+    border-radius: 10px; /* Rounded edges */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Hover state for the buttons */
+.btn-grey:hover, .btn-light-green:hover {
+    background-color: lightgreen; /* Change to light green on hover */
+}
+
+/* Apply rounded edges to the buttons */
+.rounded-circle {
+    border-radius: 10px; /* Rounded edges */
+    width: 100px; /* Adjust width as needed */
+    height: 40px; /* Adjust height as needed */
+}
+
+.mt-2 {
+    margin-bottom: 30px;
+}
+
+.social-network-button {
+    border-radius: 20px;
+    width: 100px;
+}
+
+.post-button {
+    background-color: #0EB12E;;
+}
+
+.network-button {
+    background-color: #E2F6E6;
+    color: #33AF4C;
+    font-weight: 600;
+    border: 1px solid #C8EBCF;
+}
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    max-width: 100%;
+    width: auto; /* Allow it to take full width */
+    height: 100%; /* Allow it to take full height */
+
+    .modal-content {
+        height: 100%; /* Allow it to take full height */
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+
+            /* .post-button {
+                background-color: #0EB12E;;
+            } */
+        }
+    }
+  }
+}
