@@ -21,7 +21,7 @@ let instruments = [];
 const app = express();
 const authRoutes = require('./routes/auth');
 
-const mapUserToToken = {}; // TODO fix!!
+let mapUserToToken = {}; // TODO fix!!
 
 app.use(cors({ origin: "http://localhost:3001", credentials: true }));
 app.use(express.static(path.join(__dirname, '../client')));
@@ -70,6 +70,7 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
   async (req, res) => {
     try {
       const user = req.user.profile.displayName;
+      mapUserToToken = {};
       mapUserToToken[req.session.id] = {
         token: req.user.token,
         tokenSecret: req.user.tokenSecret
@@ -144,14 +145,14 @@ async function getEtoroFeedByLoginDetails(loginDetails) {
 }
 
 async function postOnEtoroFeedByLoginDetails(loginDetails, body) {   
-  const url = `${process.env.ETORO_API_URL}api/feeds/v1/feed?path=discussion`
+  const url = `${process.env.ETORO_API_URL}api/feeds/v1/feed?path=discussion&subscription-key=${process.env.ETORO_API_KEY}`
   return await axios.post(url,
     body,
     {
       headers: {
         'Ocp-Apim-Subscription-Key': process.env.ETORO_API_KEY,
-        'x-token': loginDetails[`x-token`],
-        'x-csrf-token': loginDetails[`x-csrf-token`] 
+        'x-token': loginDetails[`token`],
+        'x-csrf-token': loginDetails[`xCsrfToken`] 
       }
     }
   )
@@ -182,7 +183,7 @@ async function getEtoroFeedByGCID(gcid) {
 }
 
 app.get('/api/getPostsFromEtoro', async(req, res) => {
-  const userName = req.query.userId;
+  const userName = req.query.username;
   const password = req.query.password;
   try {
     const gcid = await getGCID(userName);
@@ -198,8 +199,8 @@ app.get('/api/getPostsFromEtoro', async(req, res) => {
 });
 
 app.post('/api/postsOnEtoro', async(req, res) => {
-  const userName = req.query.userId;
-  const loginDetails = req.query.loginDetails; //await loginEtoroAccount(userName, password);
+  const userName = req.query.username;
+  const loginDetails = req.body.loginData;
 
   try {  
     const gcid = await getGCID(userName);
@@ -232,7 +233,8 @@ app.post('/api/postsOnEtoro', async(req, res) => {
     } else {
       body = {
         owner: gcid,
-        message: content
+        message: content,
+        attachments: []
       }
     }
     

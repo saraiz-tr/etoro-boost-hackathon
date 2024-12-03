@@ -17,18 +17,34 @@ const DashboardComponent: React.FC = () => {
     "eToro",
   ]); // Allow multiple selections
   const navigate = useNavigate();
+  const username = getLoginData()?.username;
+  const loginData = getLoginData();
 
-  const postToX = () => {
+  const postToX = (post: any) => {
     fetch('http://localhost:4000/api/postOnX', { 
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json'
       }, 
       body: JSON.stringify({
-        content: 'hello world'
+        content: post
       })
     })    
   };
+
+  const postToEtoro = (post: any) => {
+
+    fetch(`http://localhost:4000/api/postsOnEtoro?username=${username}`, { 
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json'
+      }, 
+      body: JSON.stringify({
+        content: post,
+        loginData
+      })
+    })    
+  }
 
   useEffect(() => {
     // Check if user is authenticated
@@ -38,7 +54,7 @@ const DashboardComponent: React.FC = () => {
       return;
     }
 
-    const username = getLoginData()?.username;
+    
     fetch(`http://localhost:4000/api/getSuggestedPosts?userName=${username}`)
       .then(response => response.json())
       .then(data => {
@@ -58,13 +74,24 @@ const DashboardComponent: React.FC = () => {
     setShowModal(true); // Show the modal for editing
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (tweetIndex !== null) {
       // setData((prevData) =>
       //   prevData.map((tweet, index) =>
       //     index === tweetIndex ? selectedTweet : tweet,
       //   ),
       // );
+    }
+
+    const isxSelected = selectedPlatforms.includes('X')
+    const iseToroSelected = selectedPlatforms.includes('eToro')
+
+    if (isxSelected) {
+      await postToX(selectedTweet);
+    }
+
+    if (iseToroSelected) {
+      await postToEtoro(selectedTweet);
     }
     setShowModal(false); // Close the modal
   };
