@@ -80,7 +80,7 @@ export const Login = () => {
           onLoginSuccess={(token: string, xCsrfToken: string, username: string) => {
             setLoginData({ token, xCsrfToken, username });
             setEtoroLoggedIn(true);
-            // goToDashboard();
+            goToDashboard();
           }}
         />
       </div>

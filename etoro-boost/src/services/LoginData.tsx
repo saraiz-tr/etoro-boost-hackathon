@@ -1,20 +1,29 @@
 let loginData: LoginData = {} as LoginData;
+let isXLoggedin: boolean = false;
 
 const getLoginData = () => loginData;
+const getIsXLoggedin = () => isXLoggedin;
+
+const setXData = (isLoggedIn: boolean) => {
+  localStorage.setItem('isXLoggedin', JSON.stringify(isLoggedIn));
+  isXLoggedin = isLoggedIn;
+}
 
 const setLoginData = (data: LoginData) => {
   localStorage.setItem('loginData', JSON.stringify(data));
   loginData = data;
 };
 
-export { getLoginData, setLoginData };
+export { getLoginData, setLoginData, setXData, getIsXLoggedin };
 
 export const isAuthenticated = () => {
   const localStorageData = localStorage.getItem('loginData');
-  if (localStorageData && !getLoginData().token) {
+  const xlocalStorageData = localStorage.getItem('isXLoggedin');
+  if (localStorageData && !getLoginData().token && xlocalStorageData) {
     setLoginData(JSON.parse(localStorageData));
+    setXData(JSON.parse(xlocalStorageData));
   }
-  return !!getLoginData().token;
+  return !!getLoginData().token && getIsXLoggedin();
 };
 
 export interface LoginData {

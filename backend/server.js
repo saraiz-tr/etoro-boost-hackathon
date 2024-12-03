@@ -84,9 +84,12 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
 
 // Example route to get current user info
 app.get("/auth/user", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json(req.user);
+  
+  if (Object.keys(mapUserToToken)[0]) {
+    console.log('SUCCESS',req.session.id )
+    res.json(req.session.id);
   } else {
+    console.log(mapUserToToken)
     res.status(401).json({ error: "Unauthorized" });
   }
 });
