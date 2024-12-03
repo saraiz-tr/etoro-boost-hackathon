@@ -15,7 +15,7 @@ const AIType = {
 	XAI: "XAI"
 }
 
-const USE_AI = AIType.AzureOpenAI;
+const USE_AI = AIType.XAI;
 let instruments = [];
 
 const app = express();
@@ -23,7 +23,7 @@ const authRoutes = require('./routes/auth');
 
 let mapUserToToken = {}; // TODO fix!!
 
-app.use(cors({ origin: "http://localhost:3001", credentials: true }));
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -75,7 +75,7 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
         token: req.user.token,
         tokenSecret: req.user.tokenSecret
       }
-      res.redirect("http://localhost:3001/dashboard");
+      res.redirect("http://localhost:3000/dashboard");
     } catch (err) {
       res.status(500).send("Internal Server Error");
     }
@@ -84,9 +84,12 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
 
 // Example route to get current user info
 app.get("/auth/user", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json(req.user);
+  
+  if (Object.keys(mapUserToToken)[0]) {
+    console.log('SUCCESS',req.session.id )
+    res.json(req.session.id);
   } else {
+    console.log(mapUserToToken)
     res.status(401).json({ error: "Unauthorized" });
   }
 });

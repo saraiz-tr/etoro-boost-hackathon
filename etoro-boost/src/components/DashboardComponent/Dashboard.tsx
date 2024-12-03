@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getLoginData, isAuthenticated } from "../../services/LoginData";
+import { getLoginData, isAuthenticated, setXData } from "../../services/LoginData";
 import { Modal, Button } from "react-bootstrap";
 import Skeleton from "react-loading-skeleton"; // Ensure this is installed
 import "react-loading-skeleton/dist/skeleton.css";
@@ -44,26 +44,42 @@ const DashboardComponent: React.FC = () => {
     })    
   }
 
+   
+
   useEffect(() => {
     // Check if user is authenticated
-    if (!isAuthenticated()) {
-      // User is not authenticated
-      navigate('/login');
-      return;
-    }
 
-    const username: string = getLoginData().username;
-    fetch(`http://localhost:4000/api/getSuggestedPosts?userName=${username}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log("result", data);
-        setData(data.result); // Store the result in state
-        setLoading(false); // Set loading to false after fetching data
-      })
-      .catch((error) => {
-        console.error("There was an error making the request!", error);
-        setLoading(false); // Ensure loading state is updated on error
-      });
+    fetch('http://localhost:4000/auth/user').then(response => response.json()).then((response) => { 
+      if (response.error) {
+        setXData(false);
+        navigate('/login');
+        return;
+      }
+      setXData(true);
+      console.log('error', response);
+
+      if (!isAuthenticated()) {
+        // User is not authenticated
+        navigate('/login');
+        return;
+      }
+  
+      const username: string = getLoginData().username;
+      fetch(`http://localhost:4000/api/getSuggestedPosts?userName=${username}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log("result", data);
+          setData(data.result); // Store the result in state
+          setLoading(false); // Set loading to false after fetching data
+        })
+        .catch((error) => {
+          console.error("There was an error making the request!", error);
+          setLoading(false); // Ensure loading state is updated on error
+        });
+
+    })
+   
+   
   }, []);
 
   const handleEdit = (tweet: string, index: number) => {
