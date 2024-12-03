@@ -158,14 +158,30 @@ const DashboardComponent: React.FC = () => {
                 className={`network-button  ${selectedPlatforms.includes("eToro") ? "btn-light-green" : ""} btn-primary mx-2`}
                 onClick={() => handlePlatformSelect("eToro")}
               >
-                eToro
+                <span>eToro</span>
+                <div className="button-icon">
+                  {selectedPlatforms.includes("eToro") ? (
+                      <i className="bi bi-x-circle"></i>
+                    ) : (
+                      <i className="bi bi-plus-circle"></i>
+                    )}  
+                </div>
+                
+                
               </button>
               <button
                 type="submit"
                 className={`network-button  ${selectedPlatforms.includes("X") ? "btn-light-green" : ""} btn-primary mx-2`}
                 onClick={() => handlePlatformSelect("X")}
               >
-                X
+                <span>X</span>
+                <div className="button-icon">
+                  {selectedPlatforms.includes("X") ? (
+                      <i className="bi bi-x-circle"></i>
+                    ) : (
+                      <i className="bi bi-plus-circle"></i>
+                    )}  
+                </div>
               </button>
             </div>
           </div>

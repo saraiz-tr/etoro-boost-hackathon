@@ -30,6 +30,7 @@
 } */
 
 .network-button  {
+    position: relative;
     background-color: #EEEEEF;
     color: black; /* White text color */
     /* border-radius: 10px; Rounded edges */
@@ -85,7 +86,12 @@
     font-weight: 600;
 }
 
-
+.button-icon {
+    color: black;
+    position: absolute;
+    right: 12px;
+    top: 7px;
+}
 
 @media (max-width: 576px) {
   .modal-dialog {
