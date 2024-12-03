@@ -16,6 +16,7 @@ export const LoginModal = ({ show, onHide, onLoginSuccess }: LoginModalProps) =>
   const [success, setSuccess] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const domain = process.env.REACT_APP_SERVER_DOMAIN;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +45,7 @@ export const LoginModal = ({ show, onHide, onLoginSuccess }: LoginModalProps) =>
     }
 
     try {
-      const response = await fetch('http://localhost:4000/api/login/etoro', {
+      const response = await fetch(`${domain}/api/login/etoro`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

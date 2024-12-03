@@ -15,11 +15,12 @@ const DashboardComponent: React.FC = () => {
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["eToro", "X"]); // Allow multiple selections
   const navigate = useNavigate();
+  const domain = process.env.REACT_APP_SERVER_DOMAIN;
   
   const loginData = getLoginData();
 
   const postToX = (post: any) => {
-    fetch('http://localhost:4000/api/postOnX', { 
+    fetch(`${domain}/api/postOnX`, { 
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json'
@@ -32,7 +33,7 @@ const DashboardComponent: React.FC = () => {
 
   const postToEtoro = (post: any) => {
     const username: string = getLoginData().username;
-    fetch(`http://localhost:4000/api/postsOnEtoro?username=${username}`, { 
+    fetch(`${domain}/api/postsOnEtoro?username=${username}`, { 
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json'
@@ -49,7 +50,7 @@ const DashboardComponent: React.FC = () => {
   useEffect(() => {
     // Check if user is authenticated
 
-    fetch('http://localhost:4000/auth/user').then(response => response.json()).then((response) => { 
+    fetch(`${domain}/auth/user`).then(response => response.json()).then((response) => { 
       if (response.error) {
         setXData(false);
         navigate('/login');
@@ -65,7 +66,7 @@ const DashboardComponent: React.FC = () => {
       }
   
       const username: string = getLoginData().username;
-      fetch(`http://localhost:4000/api/getSuggestedPosts?userName=${username}`)
+      fetch(`${domain}/api/getSuggestedPosts?userName=${username}`)
         .then(response => response.json())
         .then(data => {
           console.log("result", data);

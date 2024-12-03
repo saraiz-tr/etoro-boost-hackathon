@@ -12,6 +12,7 @@ export const Login = () => {
   const [etoroLoggedIn, setEtoroLoggedIn] = useState(false);
   const [xLoggedIn, setXLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const domain = process.env.REACT_APP_SERVER_DOMAIN;
 
   const goToDashboard = () => {
     // Check first the both twitter and eToro are logged in
@@ -21,10 +22,7 @@ export const Login = () => {
 
   const handleLoginX = async () => {
     // Redirect to the Twitter authentication route on the server
-    window.location.href = "http://localhost:4000/auth/twitter";
-    // const result = await fetch('http://localhost:4000/auth/twitter');
-    // const res = result.json();
-    // console.log('res', res);
+    window.location.href = `${domain}/auth/twitter`;
   };
   useEffect(() => {
     // Check if the user is logged it

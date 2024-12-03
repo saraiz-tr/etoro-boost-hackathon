@@ -1,3 +1,4 @@
 /backend/node_modules/
 /etoro-boost/node_modules/
 backend/.env
+.env
