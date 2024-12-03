@@ -120,7 +120,7 @@ export const LoginModal = ({ show, onHide, onLoginSuccess }: LoginModalProps) =>
           disabled={loading}
           form="loginForm"
         >
-          <img src="https://etoro-cdn.etorostatic.com/images/avatoros/150x150/zz.png"
+          <img src="https://etoro-cdn.etorostatic.com/web-client/et/img/etoro-boost/etoro-logo-small.svg"
             alt="eToro"
             height="24"
             style={{ objectFit: 'contain' }}
