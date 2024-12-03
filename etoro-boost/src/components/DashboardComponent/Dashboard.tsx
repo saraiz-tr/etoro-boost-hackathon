@@ -13,9 +13,7 @@ const DashboardComponent: React.FC = () => {
   const [selectedTweet, setSelectedTweet] = useState<string | null>(null); // Selected tweet for editing
   const [showModal, setShowModal] = useState<boolean>(false); // Modal state
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([
-    "eToro",
-  ]); // Allow multiple selections
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]); // Allow multiple selections
   const navigate = useNavigate();
   const username = getLoginData()?.username;
   const loginData = getLoginData();
@@ -193,24 +191,36 @@ const DashboardComponent: React.FC = () => {
           <hr /> {/* Thin border */}
           <h5 className="mt-2">Post in</h5> {/* Title */}
           <div className="mb-3">
-            <div
-              className="btn-group"
-              role="group"
-              aria-label="Platform selection"
-            >
+            <div>
               <button
-                type="button"
-                className={`network-button btn ${selectedPlatforms.includes("eToro") ? "btn-light-green" : "btn-grey"} rounded-circle mx-2`}
+                type="submit"
+                className={`network-button  ${selectedPlatforms.includes("eToro") ? "btn-light-green" : ""} btn-primary mx-2`}
                 onClick={() => handlePlatformSelect("eToro")}
               >
-                eToro
+                <span>eToro</span>
+                <div className="button-icon">
+                  {selectedPlatforms.includes("eToro") ? (
+                      <i className="bi bi-x-circle"></i>
+                    ) : (
+                      <i className="bi bi-plus-circle"></i>
+                    )}  
+                </div>
+                
+                
               </button>
               <button
-                type="button"
-                className={`network-button btn ${selectedPlatforms.includes("X") ? "btn-light-green" : "btn-grey"} rounded-circle mx-2`}
+                type="submit"
+                className={`network-button  ${selectedPlatforms.includes("X") ? "btn-light-green" : ""} btn-primary mx-2`}
                 onClick={() => handlePlatformSelect("X")}
               >
-                X
+                <span>X</span>
+                <div className="button-icon">
+                  {selectedPlatforms.includes("X") ? (
+                      <i className="bi bi-x-circle"></i>
+                    ) : (
+                      <i className="bi bi-plus-circle"></i>
+                    )}  
+                </div>
               </button>
             </div>
           </div>
