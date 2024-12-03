@@ -45,7 +45,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const { X_API_KEY, X_API_SECRET, CALLBACK_URL } = process.env;
+const { X_API_KEY, X_API_SECRET, CALLBACK_URL, CALLBACK_DOMAIN } = process.env;
 passport.use(new TwitterStrategy(
     {
       consumerKey: X_API_KEY,
