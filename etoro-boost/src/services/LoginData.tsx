@@ -14,6 +14,8 @@ const setLoginData = (data: LoginData) => {
   loginData = data;
 };
 
+const domain = process.env.REACT_APP_SERVER_DOMAIN;
+
 export { getLoginData, setLoginData, setXData, getIsXLoggedin };
 
 export const isAuthenticated = () => {
@@ -27,7 +29,7 @@ export const isAuthenticated = () => {
 };
 
 export const assertIsXLoggedin = () => {
-  return fetch('http://localhost:4000/auth/user').then(response => response.json()).then((response) => { 
+  return fetch(`${domain}/auth/user`).then(response => response.json()).then((response) => { 
     if (response.error) {
       setXData(false);
       return;
