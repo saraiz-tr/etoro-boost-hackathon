@@ -13,7 +13,7 @@ const DashboardComponent: React.FC = () => {
   const [selectedTweet, setSelectedTweet] = useState<string | null>(null); // Selected tweet for editing
   const [showModal, setShowModal] = useState<boolean>(false); // Modal state
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]); // Allow multiple selections
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["eToro", "X"]); // Allow multiple selections
   const navigate = useNavigate();
   
   const loginData = getLoginData();

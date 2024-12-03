@@ -36,8 +36,12 @@ export const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1 className="auth-title">eToro Boost</h1>
-        <p className="auth-subtitle">please login to continue</p>
+        <img className="etoro-logo" src="https://etoro-cdn.etorostatic.com/web-client/et/img/etoro-boost/logo.png"/>
+        <div className="logo-title-container">
+          <img className="etoro-boost-icon" src="https://etoro-cdn.etorostatic.com/web-client/et/img/etoro-boost/etoro-boost-icon.svg"/>
+          <h1 className="auth-title">BOOST</h1>
+        </div>
+        <p className="auth-subtitle">please login to eToro & X to continue</p>
         
         {/* eToro button container */}
         <div className="button-container">
@@ -45,29 +49,29 @@ export const Login = () => {
             className="auth-button etoro-button"
             onClick={() => setShowEtoroModal(true)}
           >
-            <img src="https://etoro-cdn.etorostatic.com/images/avatoros/150x150/zz.png"
+            <img src="https://etoro-cdn.etorostatic.com/web-client/et/img/etoro-boost/etoro-logo-small.svg"
             alt="eToro"
             height="24"
             style={{ objectFit: 'contain' }}/>
             eToro
+            {etoroLoggedIn && (
+              <span className="success-indicator">
+                {/* <i className="bi bi-check-circle-fill"></i> */}
+                <i className="bi bi-check-circle-fill"></i> {/* Bootstrap icon */}
+              </span>
+            )}
           </Button>
           
           <Button 
             className="auth-button twitter-button"
             onClick={handleLoginX} 
           >
-            <img src="https://etoro-cdn.etorostatic.com/web-client/img/sharing/icons/x.svg"
+            <img src="https://etoro-cdn.etorostatic.com/web-client/et/img/etoro-boost/x-logo.svg"
             alt="X"
-            height="24"
+            height="15"
             style={{ objectFit: 'contain' }}/>
-            X
+            Login With X
           </Button>
-          {etoroLoggedIn && (
-            <span className="success-indicator">
-              {/* <i className="bi bi-check-circle-fill"></i> */}
-              <i className="bi bi-check-circle-fill"></i> {/* Bootstrap icon */}
-            </span>
-          )}
         </div>
 
         <LoginModal 

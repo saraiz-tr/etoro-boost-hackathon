@@ -23,16 +23,24 @@ body {
 }
 
 .auth-card {
+    display: flex;
+    flex-direction: column;
     background-color: var(--card-background);
     border-radius: 12px;
     padding: 40px;
     width: 100%;
     max-width: 420px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    .etoro-logo {
+        margin: 20px auto;
+        width: 103px;
+        height: auto;
+    }
 }
 
 .auth-title {
-    font-size: 24px;
+    font-size: 15px;
     font-weight: 600;
     margin-bottom: 10px;
     text-align: center;
@@ -47,6 +55,7 @@ body {
 }
 
 .auth-button {
+    position: relative;
     width: 100%;
     padding: 12px;
     border-radius: 8px;
@@ -63,13 +72,18 @@ body {
 }
 
 .etoro-button {
-    background-color: var(--primary-color);
-    color: white;
+    /* background-color: var(--primary-color); */
+    /* color: white; */
+    background-color: #F6F6F6;
+    color: green;
 }
 
 .twitter-button {
-    background-color: #1DA1F2;
-    color: white;
+    /* background-color: #1DA1F2; */
+    /* color: white; */
+    background-color: #F6F6F6;
+    color: #2C2C2C;
+    ;
 }
 
 .auth-button:hover {
@@ -134,8 +148,18 @@ body {
 
 .success-indicator {
   position: absolute;
-  right: -30px;
-  top: 50%;
+  right: -25px;
+  top: 25px;
   transform: translateY(-50%);
   color: var(--success-color);
+}
+
+.logo-title-container {
+    display: flex;
+    justify-content: center;
+    margin-left: -32px;
+}
+
+.etoro-boost-icon {
+    margin: -10px 10px 0;
 }
