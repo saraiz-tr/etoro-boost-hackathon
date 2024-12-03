@@ -26,6 +26,23 @@ export const isAuthenticated = () => {
   return !!getLoginData().token && getIsXLoggedin();
 };
 
+export const assertIsXLoggedin = () => {
+  return fetch('http://localhost:4000/auth/user').then(response => response.json()).then((response) => { 
+    if (response.error) {
+      setXData(false);
+      return;
+    }
+    setXData(true);
+  });
+};
+
+export const asserteToroLoggedin = () => {
+  const localStorageData = localStorage.getItem('loginData');
+  if (localStorageData && !getLoginData().token) {
+    setLoginData(JSON.parse(localStorageData));
+  }
+};
+
 export interface LoginData {
     username: string;
     token: string;

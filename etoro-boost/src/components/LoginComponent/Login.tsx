@@ -5,11 +5,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../../styles/style.css';
 import { useNavigate } from 'react-router-dom';
-import { isAuthenticated, setLoginData } from '../../services/LoginData';
+import { assertIsXLoggedin, asserteToroLoggedin, getIsXLoggedin, getLoginData, isAuthenticated, setLoginData } from '../../services/LoginData';
 
 export const Login = () => {
   const [showEtoroModal, setShowEtoroModal] = useState(false);
   const [etoroLoggedIn, setEtoroLoggedIn] = useState(false);
+  const [xLoggedIn, setXLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   const goToDashboard = () => {
@@ -27,10 +28,21 @@ export const Login = () => {
   };
   useEffect(() => {
     // Check if the user is logged it
-    if (isAuthenticated()) {
+    asserteToroLoggedin();
+    if (getLoginData().token) {
       setEtoroLoggedIn(true);
-      goToDashboard();
     }
+
+    assertIsXLoggedin().then(() => {
+      if (getIsXLoggedin()) {
+        setXLoggedIn(true);
+      }
+  
+      if (isAuthenticated()) {
+        goToDashboard();
+      }
+    });
+    
   }, []);
 
   return (
@@ -71,6 +83,12 @@ export const Login = () => {
             height="15"
             style={{ objectFit: 'contain' }}/>
             Login With X
+            {xLoggedIn && (
+              <span className="success-indicator">
+                {/* <i className="bi bi-check-circle-fill"></i> */}
+                <i className="bi bi-check-circle-fill"></i> {/* Bootstrap icon */}
+              </span>
+            )}
           </Button>
         </div>
 
