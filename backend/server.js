@@ -23,7 +23,7 @@ const authRoutes = require('./routes/auth');
 
 let mapUserToToken = {}; // TODO fix!!
 
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: process.env.CALLBACK_DOMAIN, credentials: true }));
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -75,7 +75,7 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
         token: req.user.token,
         tokenSecret: req.user.tokenSecret
       }
-      res.redirect("http://localhost:3000/dashboard");
+      res.redirect(`${CALLBACK_DOMAIN}/dashboard`);
     } catch (err) {
       res.status(500).send("Internal Server Error");
     }
