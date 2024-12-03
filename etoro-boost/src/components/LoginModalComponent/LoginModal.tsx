@@ -44,7 +44,7 @@ export const LoginModal = ({ show, onHide, onLoginSuccess }: LoginModalProps) =>
     }
 
     try {
-      const response = await fetch('http://localhost:4000/api/login/etoro', {
+      const response = await fetch('/api/login/etoro', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

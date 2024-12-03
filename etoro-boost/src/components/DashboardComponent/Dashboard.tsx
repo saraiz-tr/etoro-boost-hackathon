@@ -25,7 +25,7 @@ const DashboardComponent: React.FC = () => {
     }
 
     const username = getLoginData()?.username;
-    fetch(`http://localhost:4000/api/getSuggestedPosts?userId=${username}`)
+    fetch(`/api/getSuggestedPosts?userId=${username}`)
       .then((response) => response.json())
       .then((data) => {
         console.log("result", data);
@@ -126,7 +126,7 @@ const DashboardComponent: React.FC = () => {
       >
         <Modal.Header>
           <button
-            className="btn btn-link"
+            className="close-modal-btn btn btn-link"
             onClick={() => setShowModal(false)}
             aria-label="Close"
           >

@@ -93,6 +93,10 @@
     top: 7px;
 }
 
+.close-modal-btn {
+    color: white;
+}
+
 @media (max-width: 576px) {
   .modal-dialog {
     max-width: 100%;
