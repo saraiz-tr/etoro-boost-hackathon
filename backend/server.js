@@ -260,14 +260,23 @@ app.get('/api/getSuggestedPosts', async(req, res) => {
     const portfolioData = await fetchPortfolioData(userName);   
     const positionsText = portfolioData?.positions.map((pos) => {
       const symbol = (instruments).find((element) => element.instrumentId === pos.instrumentId);
-      return `${symbol?.ticker}`;
+      return `${symbol?.ticker}: ${pos.valuePctUnrealized}`;
     });
 
-    const positionsPrompt = (positionsText !== undefined) ? ` This is my portfilio percent allocation per asset: ${positionsText.join(', ')}` : "";
+    const positionsPrompt = (positionsText !== undefined) ? ` This is my portfolio percent allocation per asset: ${positionsText.join(', ')}` : "";
+
     const prompt = `Create 5 engaging and concise tweets for traders or investors audience about the latest assets. 
     Use an enthusiastic and professional tone, include 1-2 cashtags per post, and aim to spark conversations Make the text eye-catching. 
-    The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours. 
+    The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours.
+    don't return any prices. 
     try to generate at least one poll about market changes. add @eToro in the end of each post.${positionsPrompt}`;
+
+    /**
+     the result should be in the following template: 
+    1. split the results by delimiter "*****". 
+    2. don't add any additional text except of the 5 suggestions`
+     */
+    
     // const transformedText = await transformTextByOpenAI(prompt);
     let response;
     switch (USE_AI) {
@@ -336,6 +345,7 @@ app.get('/api/getSuggestedPosts', async(req, res) => {
       for (const choice of response.data.choices) {
         const content = `\n\n${choice?.message?.content}`;
         const regex = /\n\n\d+. /; ///\*\*Tweet \d+:\*\*\n/;  
+        // const regex = /\n\n\*\*\*\*\*\n\n\d+. /; ///\*\*Tweet \d+:\*\*\n/;  
         const contentSplit = content?.split(regex)
         const arr = contentSplit?.filter(element => element !== null && element !== undefined && element !== "");;
         result = arr.concat(result);
@@ -414,8 +424,10 @@ app.post('/api/postOnX', async(req, res) => {
   }
   try {
     let accessToken, accessSecret;
-
-    const key = Object.keys(req.sessionStore.sessions)[0];
+    const filteredObject = Object.fromEntries(
+      Object.entries(req.sessionStore.sessions).filter(([key, value]) => value.includes('passport'))
+    );
+    const key = Object.keys(filteredObject)[0];
     accessToken = mapUserToToken[key].token;
     accessSecret = mapUserToToken[key].tokenSecret;
 
