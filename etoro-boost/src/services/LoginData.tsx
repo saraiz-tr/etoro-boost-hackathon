@@ -1,12 +1,21 @@
-let sharedData: LoginData = {} as LoginData;
+let loginData: LoginData = {} as LoginData;
 
-const getLoginData = () => sharedData;
+const getLoginData = () => loginData;
 
 const setLoginData = (data: LoginData) => {
-  sharedData = data;
+  localStorage.setItem('loginData', JSON.stringify(data));
+  loginData = data;
 };
 
 export { getLoginData, setLoginData };
+
+export const isAuthenticated = () => {
+  const localStorageData = localStorage.getItem('loginData');
+  if (localStorageData && !getLoginData().token) {
+    setLoginData(JSON.parse(localStorageData));
+  }
+  return !!getLoginData().token;
+};
 
 export interface LoginData {
     username: string;

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getLoginData } from "../../services/LoginData";
+import { getLoginData, isAuthenticated } from "../../services/LoginData";
 import { Modal, Button } from "react-bootstrap";
 import Skeleton from "react-loading-skeleton"; // Ensure this is installed
 import "react-loading-skeleton/dist/skeleton.css";
 import "./Dashboard.css"; // Ensure this CSS file is properly styled
-import { ChevronRight } from "react-bootstrap-icons"; // Importing chevron icon
+import { ChevronRight, ChevronLeft } from "react-bootstrap-icons"; // Importing chevron icons
+import { useNavigate } from 'react-router-dom';
 
 const DashboardComponent: React.FC = () => {
   const [data, setData] = useState<string[]>([]);
@@ -15,8 +16,16 @@ const DashboardComponent: React.FC = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([
     "eToro",
   ]); // Allow multiple selections
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+      // User is not authenticated
+      navigate('/login');
+      return;
+    }
+
     const username = getLoginData()?.username;
     fetch(`http://localhost:4000/api/getSuggestedPosts?userId=${username}`)
       .then((response) => response.json())
@@ -39,11 +48,11 @@ const DashboardComponent: React.FC = () => {
 
   const handlePost = () => {
     if (tweetIndex !== null) {
-    //   setData((prevData) =>
-    //     prevData.map((tweet, index) =>
-    //       index === tweetIndex ? selectedTweet : tweet,
-    //     ),
-    //   );
+      // setData((prevData) =>
+      //   prevData.map((tweet, index) =>
+      //     index === tweetIndex ? selectedTweet : tweet,
+      //   ),
+      // );
     }
     setShowModal(false); // Close the modal
   };
@@ -58,6 +67,9 @@ const DashboardComponent: React.FC = () => {
     );
   };
 
+  // Check if at least one platform is selected
+  const isPostDisabled = selectedPlatforms.length === 0;
+
   return (
     <div className="bg-dark text-white p-4">
       {loading ? (
@@ -71,12 +83,12 @@ const DashboardComponent: React.FC = () => {
               <div key={index} className="tweet-card p-3">
                 <Skeleton
                   count={1}
-                  height={20}
+                  height={10}
                   style={{ marginBottom: "10px", backgroundColor: "#BCC1D1" }}
                 />
                 <Skeleton
                   count={1}
-                  height={20}
+                  height={10}
                   style={{ backgroundColor: "#BCC1D1", width: "80%" }}
                 />
               </div>
@@ -114,8 +126,23 @@ const DashboardComponent: React.FC = () => {
         aria-labelledby="contained-modal-title-vcenter"
         centered
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Tweet</Modal.Title>
+        <Modal.Header>
+          <button
+            className="btn btn-link"
+            onClick={() => setShowModal(false)}
+            aria-label="Close"
+          >
+            <ChevronLeft />
+          </button>
+          <Modal.Title>Edit Post</Modal.Title>
+          <Button
+            variant="primary"
+            onClick={handlePost}
+            disabled={isPostDisabled}
+            className="post-button ml-auto"
+          >
+            Post
+          </Button>
         </Modal.Header>
         <Modal.Body>
           <textarea
@@ -128,29 +155,27 @@ const DashboardComponent: React.FC = () => {
           <h5 className="mt-2">Post in</h5> {/* Title */}
           <div className="mb-3">
             <div
+              className="btn-group"
               role="group"
               aria-label="Platform selection"
             >
               <button
                 type="button"
-                className={`social-network-button btn ${selectedPlatforms.includes("eToro") ? "btn-light-green" : "btn-grey"} mx-2`}
+                className={`network-button btn ${selectedPlatforms.includes("eToro") ? "btn-light-green" : "btn-grey"} rounded-circle mx-2`}
                 onClick={() => handlePlatformSelect("eToro")}
               >
                 eToro
               </button>
               <button
                 type="button"
-                className={`social-network-button btn ${selectedPlatforms.includes("X") ? "btn-light-green" : "btn-grey"} mx-2`}
+                className={`network-button btn ${selectedPlatforms.includes("X") ? "btn-light-green" : "btn-grey"} rounded-circle mx-2`}
                 onClick={() => handlePlatformSelect("X")}
               >
                 X
               </button>
             </div>
           </div>
-          <Button variant="primary" onClick={handlePost}>
-            Post
-          </Button>{" "}
-          {/* Post button */}
+          {/* Removed Post button from here, it is now in Header */}
         </Modal.Body>
       </Modal>
     </div>

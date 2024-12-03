@@ -52,6 +52,17 @@
     width: 100px;
 }
 
+.post-button {
+    background-color: #0EB12E;;
+}
+
+.network-button {
+    background-color: #E2F6E6;
+    color: #33AF4C;
+    font-weight: 600;
+    border: 1px solid #C8EBCF;
+}
+
 @media (max-width: 576px) {
   .modal-dialog {
     max-width: 100%;
@@ -60,6 +71,15 @@
 
     .modal-content {
         height: 100%; /* Allow it to take full height */
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+
+            /* .post-button {
+                background-color: #0EB12E;;
+            } */
+        }
     }
   }
 }

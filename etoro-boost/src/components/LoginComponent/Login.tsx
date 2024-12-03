@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import { LoginModal } from '../LoginModalComponent/LoginModal';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../../styles/style.css';
 import { useNavigate } from 'react-router-dom';
-import { setLoginData } from '../../services/LoginData';
+import { isAuthenticated, setLoginData } from '../../services/LoginData';
 
 export const Login = () => {
   const [showEtoroModal, setShowEtoroModal] = useState(false);
@@ -12,8 +13,18 @@ export const Login = () => {
   const navigate = useNavigate();
 
   const goToDashboard = () => {
+    // Check first the both twitter and eToro are logged in
     navigate('/dashboard');
+    //alert("is eToro logged in?", isAuthenticated());
   };
+
+  useEffect(() => {
+    // Check if the user is logged it
+    if (isAuthenticated()) {
+      setEtoroLoggedIn(true);
+      goToDashboard();
+    }
+  }, []);
 
   return (
     <div className="auth-container">
@@ -35,7 +46,8 @@ export const Login = () => {
           </Button>
           {etoroLoggedIn && (
             <span className="success-indicator">
-              <i className="bi bi-check-circle-fill"></i>
+              {/* <i className="bi bi-check-circle-fill"></i> */}
+              <i className="bi bi-check-circle-fill"></i> {/* Bootstrap icon */}
             </span>
           )}
         </div>
