@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { getLoginData } from '../../services/LoginData';
+import { Button } from 'react-bootstrap';
 //import './HeaderComponent.css';
 
 const DashboardComponent: React.FC = () => {
   const [data, setData] = useState<string>('');
+
+  const postToX = () => {
+    fetch('http://localhost:4000/api/postOnX', { 
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json'
+      }, 
+      body: JSON.stringify({
+        content: 'hello world'
+      })
+    })    
+  };
 
   useEffect(() => {
     const username = getLoginData()?.username;
@@ -21,6 +34,8 @@ const DashboardComponent: React.FC = () => {
   return (
     <div>
       <h1>Dashboard :)</h1>
+
+      <Button onClick={postToX}></Button>
     </div>
   );
 };

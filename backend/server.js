@@ -1,11 +1,15 @@
 require("dotenv-safe").config();
+const passport = require("passport");
 const axios = require('axios');
 const express = require('express');
 const path = require('path');
 const { v4: uuidv4 } = require("uuid");
 const cors = require('cors');
+const bodyParser = require("body-parser");
 const port = process.env.PORT || 4000;
-
+const TwitterStrategy = require("passport-twitter").Strategy;
+const session = require("express-session");
+const { TwitterApi } = require('twitter-api-v2');
 const AIType = {
 	AzureOpenAI: "AzureOpenAI",
 	XAI: "XAI"
@@ -17,14 +21,73 @@ let instruments = [];
 const app = express();
 const authRoutes = require('./routes/auth');
 
-app.use(cors());
+const mapUserToToken = {}; // TODO fix!!
+
+app.use(cors({ origin: "http://localhost:3001", credentials: true }));
 app.use(express.static(path.join(__dirname, '../client')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/api', authRoutes);
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
   res.json('hello etoro boost');
+});
+
+// Middleware setup
+app.use(session({
+  secret: process.env.X_ACCESS_SECRET,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Set to true if using HTTPS
+})
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+const { X_API_KEY, X_API_SECRET, CALLBACK_URL } = process.env;
+passport.use(new TwitterStrategy(
+    {
+      consumerKey: X_API_KEY,
+      consumerSecret: X_API_SECRET,
+      callbackURL: CALLBACK_URL
+    },
+    (token, tokenSecret, profile, done) => {
+      // Store user profile for session
+      return done(null, { profile, token, tokenSecret });
+    }
+  )
+);
+
+passport.serializeUser((user, done) => done(null, user));
+passport.deserializeUser((obj, done) => done(null, obj));
+
+
+
+app.get("/auth/twitter", passport.authenticate("twitter"));
+
+app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedirect: "/" }),
+  async (req, res) => {
+    try {
+      const user = req.user.profile.displayName;
+      mapUserToToken[req.session.id] = {
+        token: req.user.token,
+        tokenSecret: req.user.tokenSecret
+      }
+      res.redirect("http://localhost:3001/dashboard");
+    } catch (err) {
+      res.status(500).send("Internal Server Error");
+    }
+  }
+);
+
+// Example route to get current user info
+app.get("/auth/user", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json(req.user);
+  } else {
+    res.status(401).json({ error: "Unauthorized" });
+  }
 });
 
 async function fetchPortfolioData(userName) {
@@ -293,11 +356,24 @@ app.get('/api/getTweetsFromX', async(req, res) => {
   let result = [];
   const { token, tokenSecret } = req.user;
   try {
+    // if (!req.isAuthenticated()) { TODO
+    //   res.status(401).json({ error: "Unauthorized" });
+    //   return;
+    // } else {
+    //   res.json(req.user);
+    // }
+
+    const key = Object.keys(req.sessionStore.sessions)[0];
+    const accessToken = mapUserToToken[key].token;
+    const accessSecret = mapUserToToken[key].tokenSecret;
+
+    // const xToken = res.req.session.passport.user.token;
+    // const xTokenSecret = res.req.session.passport.user.tokenSecret;
     const client = new TwitterApi({
-      appKey: TWITTER_API_KEY,
-      appSecret: TWITTER_API_SECRET,
-      accessToken: token,
-      accessSecret: tokenSecret,
+      appKey: X_API_KEY,
+      appSecret: X_API_SECRET,
+      accessToken,
+      accessSecret,
     });
 
     const tweets = await client.v2.userTimelineByUsername(username, {
@@ -327,14 +403,30 @@ app.get('/api/getTweetsFromX', async(req, res) => {
 });
 
 app.post('/api/postOnX', async(req, res) => {
-  const { token, tokenSecret } = req.user;
-  const content = req.body.content;
+  const content = req?.body?.content;
+  if (content === undefined || content === "" || content === null) {
+    res.json({ result: "Invalid content"});
+  }
   try {
+    let accessToken, accessSecret;
+
+    const key = Object.keys(req.sessionStore.sessions)[0];
+    accessToken = mapUserToToken[key].token;
+    accessSecret = mapUserToToken[key].tokenSecret;
+
+    // if (req.isAuthenticated()) {
+    //   xToken = res.req.session.passport.user.token;
+    //   xTokenSecret = res.req.session.passport.user.tokenSecret;
+    //   // res.json(req.user);
+    // } else {
+    //   res.status(401).json({ error: "Unauthorized" });
+    //   return;
+    // }
     const client = new TwitterApi({
-      appKey: TWITTER_API_KEY,
-      appSecret: TWITTER_API_SECRET,
-      accessToken: token,
-      accessSecret: tokenSecret,
+      appKey: X_API_KEY,
+      appSecret: X_API_SECRET,
+      accessToken,
+      accessSecret
     });
     let response;
     if (content?.includes("Poll Time!")) {
@@ -359,11 +451,12 @@ app.post('/api/postOnX', async(req, res) => {
     } else {
       response = client.v2.tweet(content)
       .then((response) => {
-        res.send(`Tweeted: ${response.data.text}`);
+        // res.send(`Tweeted: ${response?.data?.text}`);
         return "success";
       })
       .catch((err) => {
-        res.status(500).send(`Error: ${err.message}`);
+        // res.status(500).send(`Error: ${err.message}`);
+        // res.send(`failed`); // TODO 
         return "failed";
       });
     }
