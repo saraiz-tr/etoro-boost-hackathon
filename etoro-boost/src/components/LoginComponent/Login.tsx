@@ -18,6 +18,13 @@ export const Login = () => {
     //alert("is eToro logged in?", isAuthenticated());
   };
 
+  const handleLoginX = async () => {
+    // Redirect to the Twitter authentication route on the server
+    window.location.href = "http://localhost:4000/auth/twitter";
+    // const result = await fetch('http://localhost:4000/auth/twitter');
+    // const res = result.json();
+    // console.log('res', res);
+  };
   useEffect(() => {
     // Check if the user is logged it
     if (isAuthenticated()) {
@@ -44,6 +51,17 @@ export const Login = () => {
             style={{ objectFit: 'contain' }}/>
             eToro
           </Button>
+          
+          <Button 
+            className="auth-button twitter-button"
+            onClick={handleLoginX} 
+          >
+            <img src="https://etoro-cdn.etorostatic.com/web-client/img/sharing/icons/x.svg"
+            alt="X"
+            height="24"
+            style={{ objectFit: 'contain' }}/>
+            X
+          </Button>
           {etoroLoggedIn && (
             <span className="success-indicator">
               {/* <i className="bi bi-check-circle-fill"></i> */}
@@ -58,7 +76,7 @@ export const Login = () => {
           onLoginSuccess={(token: string, xCsrfToken: string, username: string) => {
             setLoginData({ token, xCsrfToken, username });
             setEtoroLoggedIn(true);
-            goToDashboard();
+            // goToDashboard();
           }}
         />
       </div>
