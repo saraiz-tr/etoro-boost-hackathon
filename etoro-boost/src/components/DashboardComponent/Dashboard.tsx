@@ -15,7 +15,7 @@ const DashboardComponent: React.FC = () => {
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]); // Allow multiple selections
   const navigate = useNavigate();
-  const username = getLoginData()?.username;
+  
   const loginData = getLoginData();
 
   const postToX = (post: any) => {
@@ -31,7 +31,7 @@ const DashboardComponent: React.FC = () => {
   };
 
   const postToEtoro = (post: any) => {
-
+    const username: string = getLoginData().username;
     fetch(`http://localhost:4000/api/postsOnEtoro?username=${username}`, { 
       method: 'POST', 
       headers: {
@@ -52,7 +52,7 @@ const DashboardComponent: React.FC = () => {
       return;
     }
 
-    
+    const username: string = getLoginData().username;
     fetch(`http://localhost:4000/api/getSuggestedPosts?userName=${username}`)
       .then(response => response.json())
       .then(data => {
