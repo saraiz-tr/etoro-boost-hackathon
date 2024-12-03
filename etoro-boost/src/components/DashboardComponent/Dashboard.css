@@ -6,6 +6,7 @@
 }
 
 .tweet-card {
+    position: relative;
     background-color: #343a40; /* Darker background for tweet cards */
     border-radius: 10px;
     color: white; /* Ensure text color is white */
@@ -95,6 +96,14 @@
 
 .close-modal-btn {
     color: white;
+}
+
+.post-success {
+    position: absolute;
+    right: 15px;
+    bottom: 8px;
+    color: #0EB12E;
+
 }
 
 @media (max-width: 576px) {

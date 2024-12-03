@@ -16,6 +16,7 @@ const DashboardComponent: React.FC = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["eToro", "X"]); // Allow multiple selections
   const navigate = useNavigate();
   const domain = process.env.REACT_APP_SERVER_DOMAIN;
+  const [postedTweets, setPostedTweets] = useState<number[]>([]);
   
   const loginData = getLoginData();
 
@@ -90,14 +91,6 @@ const DashboardComponent: React.FC = () => {
   };
 
   const handlePost = async () => {
-    if (tweetIndex !== null) {
-      // setData((prevData) =>
-      //   prevData.map((tweet, index) =>
-      //     index === tweetIndex ? selectedTweet : tweet,
-      //   ),
-      // );
-    }
-
     const isxSelected = selectedPlatforms.includes('X')
     const iseToroSelected = selectedPlatforms.includes('eToro')
 
@@ -109,6 +102,7 @@ const DashboardComponent: React.FC = () => {
       await postToEtoro(selectedTweet);
     }
     setShowModal(false); // Close the modal
+    setPostedTweets([...postedTweets, tweetIndex!]);
   };
 
   // Handle the platform selection
@@ -150,23 +144,27 @@ const DashboardComponent: React.FC = () => {
           )}
         </div>
       ) : (
-        <div className="tweets-container">
+          <div className="tweets-container">
           <h1>Suggested Posts</h1>
           {data.map((tweet, index) => (
             <div
               key={index}
               className="tweet-card p-3 d-flex justify-content-between align-items-center"
+              onClick={() => handleEdit(tweet, index)} // Handle click for the entire container
+              style={{ cursor: 'pointer' }} // Change cursor to pointer to indicate clickability
             >
-              {" "}
-              {/* Flexbox for alignment */}
               <p className="m-0">{tweet}</p>
               <button
-                onClick={() => handleEdit(tweet, index)} // Pass index to identify tweet
                 className="btn btn-link text-white"
                 aria-label="Edit Tweet"
               >
                 <ChevronRight />
               </button>
+              {postedTweets.includes(index) &&
+              <span className="post-success">
+                <i className="bi bi-check-circle-fill"></i> {/* Bootstrap icon */}
+              </span>
+              }
             </div>
           ))}
         </div>
