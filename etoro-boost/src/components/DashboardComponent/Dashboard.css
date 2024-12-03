@@ -17,23 +17,48 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
 }
 
+/* .btn:hover,
+.btn:focus,
+.btn:active  {
+    background-color: #EEEEEF;
+    color: black;
+    transition: background-color 0.3s ease;
+    font-weight: 600;
+    border-radius: 20px;
+    border: 1px solid #EEEEEF;
+    min-width: 155px;
+} */
+
+.network-button  {
+    background-color: #EEEEEF;
+    color: black; /* White text color */
+    /* border-radius: 10px; Rounded edges */
+    transition: background-color 0.3s ease; /* Smooth transition */
+    font-weight: 600;
+    border-radius: 20px;
+    border: 1px solid #EEEEEF;
+    min-width: 155px;
+    height: 38px;
+}
+
 .btn-grey {
-    background-color: grey; /* Grey background color */
-    color: white; /* White text color */
-    border-radius: 10px; /* Rounded edges */
+    background-color: #EEEEEF;
+    color: black; /* White text color */
+    /* border-radius: 10px; Rounded edges */
     transition: background-color 0.3s ease; /* Smooth transition */
 }
 
 .btn-light-green {
-    background-color: lightgreen; /* Light green background when selected */
-    color: white; /* White text color */
-    border-radius: 10px; /* Rounded edges */
+    background-color: #E2F6E6;
+    color: #33AF4C;
+    /* border-radius: 10px; Rounded edges */
     transition: background-color 0.3s ease; /* Smooth transition */
+    border: 1px solid #C8EBCF;
 }
 
 /* Hover state for the buttons */
 .btn-grey:hover, .btn-light-green:hover {
-    background-color: lightgreen; /* Change to light green on hover */
+    /* background-color: lightgreen; Change to light green on hover */
 }
 
 /* Apply rounded edges to the buttons */
@@ -52,16 +77,15 @@
     width: 100px;
 }
 
-.post-button {
+.post-button, .post-button:disabled {
     background-color: #0EB12E;;
+    border-color: #0EB12E;
+    border-radius: 20px;
+    width: 63px;
+    font-weight: 600;
 }
 
-.network-button {
-    background-color: #E2F6E6;
-    color: #33AF4C;
-    font-weight: 600;
-    border: 1px solid #C8EBCF;
-}
+
 
 @media (max-width: 576px) {
   .modal-dialog {
