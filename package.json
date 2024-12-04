@@ -1,0 +1,11 @@
+{
+    "name": "etoro-boost-app",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "install-all": "npm install --prefix backend && npm install --prefix etoro-boost",
+      "build": "cd etoro-boost && npm run build",
+      "start": "npm start --prefix backend"
+    }
+  }
+  

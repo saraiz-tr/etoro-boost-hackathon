@@ -2,3 +2,4 @@
 /etoro-boost/node_modules/
 backend/.env
 .env
+etoro-boost/build
