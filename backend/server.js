@@ -34,9 +34,10 @@ app.get('/', (req, res) => {
   res.json('hello etoro boost');
 });
 
+const { X_API_KEY, X_API_SECRET, X_ACCESS_SECRET, CALLBACK_URL, CALLBACK_DOMAIN } = process.env;
 // Middleware setup
 app.use(session({
-  secret: process.env.X_ACCESS_SECRET,
+  secret: X_ACCESS_SECRET,
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false } // Set to true if using HTTPS
@@ -45,7 +46,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-const { X_API_KEY, X_API_SECRET, CALLBACK_URL, CALLBACK_DOMAIN } = process.env;
 passport.use(new TwitterStrategy(
     {
       consumerKey: X_API_KEY,
@@ -84,8 +84,12 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
 
 // Example route to get current user info
 app.get("/auth/user", (req, res) => {
+  const filteredObject = Object.fromEntries(
+    Object.entries(req.sessionStore.sessions).filter(([key, value]) => value.includes('passport'))
+  );
+  const key = Object.keys(filteredObject)[0];
   
-  if (Object.keys(mapUserToToken)[0]) {
+  if (mapUserToToken[key]) {
     console.log('SUCCESS',req.session.id )
     res.json(req.session.id);
   } else {
@@ -167,118 +171,12 @@ async function postOnEtoroFeedByLoginDetails(loginDetails, body) {
   });
 }
 
-async function getEtoroFeedByGCID(gcid) {
-  const clientRequestId = uuidv4();
-  const url = `${process.env.ETORO_API_GATEWAY}feed/user/all/${gcid}?take=10&offset=0&reactionsPageSize=10&client_request_id=${clientRequestId}`;
-  return await axios
-    .request({
-      method: "get",
-      maxBodyLength: Infinity,
-      url
-    })
-    .then((response) => {
-      console.log(JSON.stringify(response.data));
-      return response.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-}
-
-app.get('/api/getPostsFromEtoro', async(req, res) => {
-  const userName = req.query.username;
-  const password = req.query.password;
-  try {
-    const gcid = await getGCID(userName);
-    const eToroFeed = await getEtoroFeedByGCID(gcid);
-    const result = eToroFeed?.discussions?.map(item => item?.post?.message?.text)
-      .filter(element => element !== null && element !== undefined && element !== "");;
-    console.log(`eToro feed for user ${userName}: ${eToroFeed}`);
-    res.json({ result });
-  } catch (e) {
-    res.json({ e });
-    console.error('Failed to get eToro feed ', JSON.stringify(e));
-  }
-});
-
-app.post('/api/postsOnEtoro', async(req, res) => {
-  const userName = req.query.username;
-  const loginDetails = req.body.loginData;
-
-  try {  
-    const gcid = await getGCID(userName);
-    const content = req.body.content;
-    let body = {};
-    
-    if (content?.includes("Poll Time!")) {
-      // TODO return: Poll is currently not supported
-      const contentSplit = content?.split(`\r\n   - `);
-      const text = contentSplit[0];
-      let optionsInput = contentSplit?.slice(1, contentSplit.length);
-      const options = optionsInput?.map((option) => {
-        return {
-          // "id": 0,
-          // "index": 1,
-          text: option,
-          // "isUserVoted": false,
-          // "votesCount": 0
-        };
-    })
-      body = {
-        owner: gcid,
-        message: content,
-        poll: {
-          title: content,
-          options
-        }
-
-      }
-    } else {
-      body = {
-        owner: gcid,
-        message: content,
-        attachments: []
-      }
-    }
-    
-    const result = await postOnEtoroFeedByLoginDetails(loginDetails, body);
-    res.json({ result });
-  } catch (e) {
-    res.json({ e });
-    console.error('Failed to get eToro feed ', JSON.stringify(e));
-  }
-});
-
-app.get('/api/getSuggestedPosts', async(req, res) => {
-  const userName = req.query.userName;
-  if (userName === undefined) {
-    res.json({ error: "Invalid input: userName"});
-    return;
-  }
+async function generatePostsByAI(content) {
+  const prompt = `${content}. The result should be in the following template: 1. split the results by delimiter "*****". 2. don't add any additional text except of the 5 suggestions`;
   let result = [];
+  let response;
+
   try {
-    const portfolioData = await fetchPortfolioData(userName);   
-    const positionsText = portfolioData?.positions.map((pos) => {
-      const symbol = (instruments).find((element) => element.instrumentId === pos.instrumentId);
-      return `${symbol?.ticker}: ${pos.valuePctUnrealized}`;
-    });
-
-    const positionsPrompt = (positionsText !== undefined) ? ` This is my portfolio percent allocation per asset: ${positionsText.join(', ')}` : "";
-
-    const prompt = `Create 5 engaging and concise tweets for traders or investors audience about the latest assets. 
-    Use an enthusiastic and professional tone, include 1-2 cashtags per post, and aim to spark conversations Make the text eye-catching. 
-    The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours.
-    don't return any prices. 
-    try to generate at least one poll about market changes. add @eToro in the end of each post.${positionsPrompt}`;
-
-    /**
-     the result should be in the following template: 
-    1. split the results by delimiter "*****". 
-    2. don't add any additional text except of the 5 suggestions`
-     */
-    
-    // const transformedText = await transformTextByOpenAI(prompt);
-    let response;
     switch (USE_AI) {
       case "XAI":
         response= await axios.post(process.env.XAI_URL,
@@ -345,13 +243,154 @@ app.get('/api/getSuggestedPosts', async(req, res) => {
       for (const choice of response.data.choices) {
         const content = `\n\n${choice?.message?.content}`;
         const regex = /\n\n\d+. /; ///\*\*Tweet \d+:\*\*\n/;  
-        // const regex = /\n\n\*\*\*\*\*\n\n\d+. /; ///\*\*Tweet \d+:\*\*\n/;  
-        const contentSplit = content?.split(regex)
+        // const regex = /\n\n\*\*\*\*\*\n\n\d+. /;
+        // const regex = /\n\n\*\*\*\*\*\n\n/;
+
+        // /\n\*\*\*\*\*\n3. d+. /
+        let contentSplit = content?.split(`\n*****\n`);
+        if (contentSplit?.length > 5) {
+          contentSplit = contentSplit?.slice(1, contentSplit.length);
+        } else if (contentSplit?.length < 5) {
+          contentSplit = content?.split(` *****\n\n`);
+        }
         const arr = contentSplit?.filter(element => element !== null && element !== undefined && element !== "");;
         result = arr.concat(result);
         // console.log(`Choice ${choice.index}: ${choice?.message?.content}`);
       }
     }
+  } catch (e) {  
+    console.error('Failed to get suggested posts ', JSON.stringify(e));
+  }
+  // const transformedText = await transformTextByOpenAI(prompt);
+  return result;
+}
+
+async function getEtoroFeedByGCID(gcid) {
+  const clientRequestId = uuidv4();
+  const url = `${process.env.ETORO_API_GATEWAY}feed/user/all/${gcid}?take=10&offset=0&reactionsPageSize=10&client_request_id=${clientRequestId}`;
+  return await axios
+    .request({
+      method: "get",
+      maxBodyLength: Infinity,
+      url
+    })
+    .then((response) => {
+      console.log(JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+}
+
+app.get('/api/getPostsFromEtoro', async(req, res) => {
+  const userName = req.query.username;
+  const password = req.query.password;
+  try {
+    const gcid = await getGCID(userName);
+    const eToroFeed = await getEtoroFeedByGCID(gcid);
+    const result = eToroFeed?.discussions?.map(item => item?.post?.message?.text)
+      .filter(element => element !== null && element !== undefined && element !== "");;
+    console.log(`eToro feed for user ${userName}: ${eToroFeed}`);
+    res.json({ result });
+  } catch (e) {
+    res.json({ e });
+    console.error('Failed to get eToro feed ', JSON.stringify(e));
+  }
+});
+
+app.post('/api/postsOnEtoro', async(req, res) => {
+  const userName = req.query.username;
+  const loginDetails = req.body.loginData; // TODO move to headers
+
+  try {  
+    const gcid = await getGCID(userName);
+    const content = req.body.content;
+    let body = {};
+    
+    if (content?.includes("Poll Time!")) {
+      // TODO return: Poll is currently not supported
+      const contentSplit = content?.split(`\r\n   - `);
+      const text = contentSplit[0];
+      let optionsInput = contentSplit?.slice(1, contentSplit.length);
+      const options = optionsInput?.map((option) => {
+        return {
+          // "id": 0,
+          // "index": 1,
+          text: option,
+          // "isUserVoted": false,
+          // "votesCount": 0
+        };
+    })
+      body = {
+        owner: gcid,
+        message: content,
+        poll: {
+          title: content,
+          options
+        }
+
+      }
+    } else {
+      body = {
+        owner: gcid,
+        message: content,
+        attachments: []
+      }
+    }
+    
+    const result = await postOnEtoroFeedByLoginDetails(loginDetails, body);
+    res.json({ result });
+  } catch (e) {
+    res.json({ e });
+    console.error('Failed to get eToro feed ', JSON.stringify(e));
+  }
+});
+
+app.post('/api/getSuggestedPosts', async(req, res) => {
+  const prompt = req?.body?.prompt;
+  if (prompt === undefined || prompt === "" || prompt === null) {
+    res.json({ result: "Invalid prompt"});
+  }
+  let result = [];
+  try {
+
+    result = await generatePostsByAI(prompt);
+  } catch (error) {
+    console.error('Error in POST getSuggestedPosts:', error);
+    res.json({ error: error.message });
+    return;
+  } 
+  console.log(`Suggested Posts Based On user prompt:\n${result}`);
+  result.forEach(res => console.log(res));
+  res.json({ result });
+});
+
+app.get('/api/getSuggestedPosts', async(req, res) => {
+  const userName = req.query.userName;
+  if (userName === undefined) {
+    res.json({ error: "Invalid input: userName"});
+    return;
+  }
+  let result = [];
+  try {
+    const portfolioData = await fetchPortfolioData(userName);   
+    const positionsText = portfolioData?.positions.map((pos) => {
+      const symbol = (instruments).find((element) => element.instrumentId === pos.instrumentId);
+      return `${symbol?.ticker}: ${pos.valuePctUnrealized}`;
+    });
+
+    const positionsPrompt = (positionsText !== undefined) ? ` This is my portfolio percent allocation per asset: ${positionsText.join(', ')}` : "";
+
+    const prompt = `Create 5 engaging and concise tweets for traders or investors audience about the latest assets. 
+    Use an enthusiastic and professional tone, include 1-2 cashtags per post, and aim to spark conversations Make the text eye-catching. 
+    The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours.
+    don't return any prices. 
+    try to generate at least one poll about market changes. add @eToro in the end of each post.${positionsPrompt}`;
+
+    result = await generatePostsByAI(prompt);
+    
+    
   } catch (error) {
     console.error('Error connecting to Twitter API:', error);
     res.json({ error: error.message });
@@ -378,7 +417,10 @@ app.get('/api/getTweetsFromX', async(req, res) => {
     //   res.json(req.user);
     // }
 
-    const key = Object.keys(req.sessionStore.sessions)[0];
+    const filteredObject = Object.fromEntries(
+      Object.entries(req.sessionStore.sessions).filter(([key, value]) => value.includes('passport'))
+    );
+    const key = Object.keys(filteredObject)[0];
     const accessToken = mapUserToToken[key].token;
     const accessSecret = mapUserToToken[key].tokenSecret;
 
@@ -427,6 +469,7 @@ app.post('/api/postOnX', async(req, res) => {
     const filteredObject = Object.fromEntries(
       Object.entries(req.sessionStore.sessions).filter(([key, value]) => value.includes('passport'))
     );
+    
     const key = Object.keys(filteredObject)[0];
     accessToken = mapUserToToken[key].token;
     accessSecret = mapUserToToken[key].tokenSecret;
@@ -450,7 +493,7 @@ app.post('/api/postOnX', async(req, res) => {
       const contentSplit = content?.split(`\r\n   - `);
       const text = contentSplit[0];
       const options = contentSplit?.slice(1, contentSplit.length);
-      response = client.v2.tweet({
+      response = await client.v2.tweet({
           text,
           poll: {
             duration_minutes: 1440, // Poll duration in minutes (maximum is 1440 minutes / 24 hours)
@@ -466,19 +509,17 @@ app.post('/api/postOnX', async(req, res) => {
           return "failed";
         });
     } else {
-      response = client.v2.tweet(content)
+      response = await client.v2.tweet(content)
       .then((response) => {
         // res.send(`Tweeted: ${response?.data?.text}`);
-        return "success";
+        return "Tweet created";
       })
       .catch((err) => {
         // res.status(500).send(`Error: ${err.message}`);
         // res.send(`failed`); // TODO 
-        return "failed";
+        return `Tweet failed: ${err?.data?.title}`;
       });
     }
-
-    console.log('Tweet created:', response);
     res.json({ result: response});
   } catch (error) {
     const errMsg = `Error creating tweet: ${error.response?.data ? JSON.stringify(error.response?.data) : JSON.stringify(error.message)}`;
