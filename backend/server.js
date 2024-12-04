@@ -9,7 +9,9 @@ const bodyParser = require("body-parser");
 const port = process.env.PORT || 4000;
 const TwitterStrategy = require("passport-twitter").Strategy;
 const session = require("express-session");
+const authRoutes = require('./routes/auth');
 const { TwitterApi } = require('twitter-api-v2');
+
 const AIType = {
 	AzureOpenAI: "AzureOpenAI",
 	XAI: "XAI"
@@ -17,11 +19,10 @@ const AIType = {
 
 const USE_AI = AIType.XAI;
 let instruments = [];
-
+let mapUserToToken = {};
 const app = express();
-const authRoutes = require('./routes/auth');
 
-let mapUserToToken = {}; // TODO fix!!
+const { X_API_KEY, X_API_SECRET, X_ACCESS_SECRET, CALLBACK_URL, CALLBACK_DOMAIN } = process.env;
 
 app.use(cors({ origin: process.env.CALLBACK_DOMAIN, credentials: true }));
 app.use(express.static(path.join(__dirname, '../client')));
@@ -34,10 +35,9 @@ app.get('/', (req, res) => {
   res.json('hello etoro boost');
 });
 
-const { X_API_KEY, X_API_SECRET, X_ACCESS_SECRET, CALLBACK_URL, CALLBACK_DOMAIN } = process.env;
 // Middleware setup
 app.use(session({
-  secret: X_ACCESS_SECRET,
+  secret: "twitter-auth-secret",
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false } // Set to true if using HTTPS
@@ -67,7 +67,7 @@ passport.deserializeUser((obj, done) => done(null, obj));
 app.get("/auth/twitter", passport.authenticate("twitter"));
 
 app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedirect: "/" }),
-  async (req, res) => {
+  (req, res) => {
     try {
       const user = req.user.profile.displayName;
       mapUserToToken = {};
@@ -87,6 +87,10 @@ app.get("/auth/user", (req, res) => {
   const filteredObject = Object.fromEntries(
     Object.entries(req.sessionStore.sessions).filter(([key, value]) => value.includes('passport'))
   );
+  if (Object.keys(filteredObject)?.length > 1) {
+    res.json("Object.keys(filteredObject)?.length > 1");
+    return;
+  }
   const key = Object.keys(filteredObject)[0];
   
   if (mapUserToToken[key]) {
@@ -401,12 +405,7 @@ app.get('/api/getSuggestedPosts', async(req, res) => {
   res.json({ result });
 });
 
-/**
- * GET getTweetsFromX
- * @param token
- * @param tokenSecret
- */
-app.get('/api/getTweetsFromX', async(req, res) => {
+/* app.get('/api/getTweetsFromX', async(req, res) => {
   let result = [];
   const { token, tokenSecret } = req.user;
   try {
@@ -457,7 +456,7 @@ app.get('/api/getTweetsFromX', async(req, res) => {
     return;
   }
   res.json({ result });
-});
+}); */
 
 app.post('/api/postOnX', async(req, res) => {
   const content = req?.body?.content;
@@ -470,6 +469,11 @@ app.post('/api/postOnX', async(req, res) => {
       Object.entries(req.sessionStore.sessions).filter(([key, value]) => value.includes('passport'))
     );
     
+    if (Object.keys(filteredObject)?.length > 1) {
+      res.json("Object.keys(filteredObject)?.length > 1");
+      return;
+    }
+
     const key = Object.keys(filteredObject)[0];
     accessToken = mapUserToToken[key].token;
     accessSecret = mapUserToToken[key].tokenSecret;
