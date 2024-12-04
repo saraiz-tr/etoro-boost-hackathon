@@ -30,7 +30,12 @@ const {
   CALLBACK_DOMAIN,
 } = process.env;
 
-app.use(cors({ origin: process.env.CALLBACK_DOMAIN, credentials: true }));
+let domainForCors = process.env.CALLBACK_DOMAIN;
+if (domainForCors.length > 1 && domainForCors.slice(-1) === '/') {
+  domainForCors = domainForCors.slice(0, -1);
+}
+
+app.use(cors({ origin: domainForCors, credentials: true }));
 app.use(express.static(path.join(__dirname, "../client")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -258,7 +263,7 @@ async function generatePostsByAI(content) {
     if (response.status === 200) {
       for (const choice of response.data.choices) {
         const content = `${choice?.message?.content}`;
-\        try {
+        try {
           const jsonContent = JSON.parse(content);
           result = jsonContent.map((obj) => obj.text);
         } catch (error) {
