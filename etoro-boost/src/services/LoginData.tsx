@@ -29,12 +29,14 @@ export const isAuthenticated = () => {
 };
 
 export const assertIsXLoggedin = () => {
-  return fetch(`${domain}/auth/user`).then(response => response.json()).then((response) => { 
+  return fetch(`${domain}auth/user`).then(response => response.json()).then((response) => { 
     if (response.error) {
       setXData(false);
       return;
     }
     setXData(true);
+  }).catch((error) => {
+    setXData(false);
   });
 };
 
