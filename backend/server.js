@@ -71,7 +71,7 @@ app.get("/auth/twitter/callback", passport.authenticate("twitter", { failureRedi
         token: req.user.token,
         tokenSecret: req.user.tokenSecret
       }
-      res.redirect(`${CALLBACK_DOMAIN}/dashboard`);
+      res.redirect(`${CALLBACK_DOMAIN}dashboard`);
     } catch (err) {
       res.status(500).send("Internal Server Error");
     }

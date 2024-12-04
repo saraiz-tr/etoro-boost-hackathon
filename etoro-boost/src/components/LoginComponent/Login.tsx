@@ -22,7 +22,7 @@ export const Login = () => {
 
   const handleLoginX = async () => {
     // Redirect to the Twitter authentication route on the server
-    window.location.href = `${domain}/auth/twitter`;
+    window.location.href = `${domain}auth/twitter`;
   };
   useEffect(() => {
     // Check if the user is logged it

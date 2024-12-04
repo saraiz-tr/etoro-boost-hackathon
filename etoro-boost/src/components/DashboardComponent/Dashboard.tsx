@@ -21,7 +21,7 @@ const DashboardComponent: React.FC = () => {
   const loginData = getLoginData();
 
   const postToX = (post: any) => {
-    fetch(`${domain}/api/postOnX`, { 
+    fetch(`${domain}api/postOnX`, { 
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json'
@@ -34,7 +34,7 @@ const DashboardComponent: React.FC = () => {
 
   const postToEtoro = (post: any) => {
     const username: string = getLoginData().username;
-    fetch(`${domain}/api/postsOnEtoro?username=${username}`, { 
+    fetch(`${domain}api/postsOnEtoro?username=${username}`, { 
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json'
@@ -51,7 +51,7 @@ const DashboardComponent: React.FC = () => {
   useEffect(() => {
     // Check if user is authenticated
 
-    fetch(`${domain}/auth/user`).then(response => response.json()).then((response) => { 
+    fetch(`${domain}auth/user`).then(response => response.json()).then((response) => { 
       if (response.error) {
         setXData(false);
         navigate('/login');
@@ -67,7 +67,7 @@ const DashboardComponent: React.FC = () => {
       }
   
       const username: string = getLoginData().username;
-      fetch(`${domain}/api/getSuggestedPosts?userName=${username}`)
+      fetch(`${domain}api/getSuggestedPosts?userName=${username}`)
         .then(response => response.json())
         .then(data => {
           console.log("result", data);
