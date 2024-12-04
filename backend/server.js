@@ -30,10 +30,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', authRoutes);
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get('/', (req, res) => {
-  res.json('hello etoro boost');
-});
-
 // Middleware setup
 app.use(session({
   secret: process.env.X_ACCESS_SECRET,
@@ -485,6 +481,15 @@ app.post('/api/postOnX', async(req, res) => {
     console.error(errMsg);
     res.json({ result: errMsg });
   }
+});
+
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, "../etoro-boost/build")));
+
+// Handle React routing, return all requests to React app
+app.get("*", (req, res) => {
+  // This needs to be AFTER your API routes
+  res.sendFile(path.join(__dirname, "../etoro-boost/build", "index.html"));
 });
 
 app.listen(port, async() => {
