@@ -56,7 +56,7 @@ const EditModal: React.FC<EditModalProps> = ({
           value={selectedTweet || ""}
           onChange={(e) => setSelectedTweet(e.target.value)}
           className="form-control"
-          rows={5}
+          rows={10}
         />
         <hr /> {/* Thin border */}
         <h5 className="mt-2">Post in</h5> {/* Title */}
