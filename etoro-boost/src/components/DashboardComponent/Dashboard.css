@@ -18,84 +18,11 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
 }
 
-/* .btn:hover,
-.btn:focus,
-.btn:active  {
-    background-color: #EEEEEF;
-    color: black;
-    transition: background-color 0.3s ease;
-    font-weight: 600;
-    border-radius: 20px;
-    border: 1px solid #EEEEEF;
-    min-width: 155px;
-} */
-
-.network-button  {
-    position: relative;
-    background-color: #EEEEEF;
-    color: black; /* White text color */
-    /* border-radius: 10px; Rounded edges */
-    transition: background-color 0.3s ease; /* Smooth transition */
-    font-weight: 600;
-    border-radius: 20px;
-    border: 1px solid #EEEEEF;
-    min-width: 155px;
-    height: 38px;
-}
-
-.btn-grey {
-    background-color: #EEEEEF;
-    color: black; /* White text color */
-    /* border-radius: 10px; Rounded edges */
-    transition: background-color 0.3s ease; /* Smooth transition */
-}
-
-.btn-light-green {
-    background-color: #E2F6E6;
-    color: #33AF4C;
-    /* border-radius: 10px; Rounded edges */
-    transition: background-color 0.3s ease; /* Smooth transition */
-    border: 1px solid #C8EBCF;
-}
-
-/* Hover state for the buttons */
-.btn-grey:hover, .btn-light-green:hover {
-    /* background-color: lightgreen; Change to light green on hover */
-}
-
 /* Apply rounded edges to the buttons */
 .rounded-circle {
     border-radius: 10px; /* Rounded edges */
     width: 100px; /* Adjust width as needed */
     height: 40px; /* Adjust height as needed */
-}
-
-.mt-2 {
-    margin-bottom: 30px;
-}
-
-.social-network-button {
-    border-radius: 20px;
-    width: 100px;
-}
-
-.post-button, .post-button:disabled {
-    background-color: #0EB12E;;
-    border-color: #0EB12E;
-    border-radius: 20px;
-    width: 63px;
-    font-weight: 600;
-}
-
-.button-icon {
-    color: black;
-    position: absolute;
-    right: 12px;
-    top: 7px;
-}
-
-.close-modal-btn {
-    color: white;
 }
 
 .post-success {
@@ -104,25 +31,4 @@
     bottom: 8px;
     color: #0EB12E;
 
-}
-
-@media (max-width: 576px) {
-  .modal-dialog {
-    max-width: 100%;
-    width: auto; /* Allow it to take full width */
-    height: 100%; /* Allow it to take full height */
-
-    .modal-content {
-        height: 100%; /* Allow it to take full height */
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-
-            /* .post-button {
-                background-color: #0EB12E;;
-            } */
-        }
-    }
-  }
 }

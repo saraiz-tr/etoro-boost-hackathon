@@ -2,6 +2,7 @@
 import React from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { ChevronLeft } from 'react-bootstrap-icons';
+import './EditModal.css';
 
 interface EditModalProps {
   showModal: boolean;
@@ -60,7 +61,7 @@ const EditModal: React.FC<EditModalProps> = ({
         <hr /> {/* Thin border */}
         <h5 className="mt-2">Post in</h5> {/* Title */}
         <div className="mb-3">
-          <div>
+          <div className="buttons-container">
             <button
               type="submit"
               className={`network-button  ${selectedPlatforms.includes("eToro") ? "btn-light-green" : ""} btn-primary mx-2`}
