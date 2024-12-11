@@ -14,12 +14,12 @@ router.post('/login/etoro', async (req, res) => {
     }
 
     const response = await axios.post(
-      'https://api.etoro.com/API/Trading/V1/Account/Login',
+      `${process.env.ETORO_API_URL}api/trading/v1/account/login`,
       { username, password },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Ocp-Apim-Subscription-Key': 'e346b9724ae940b1893d55ea8f30527f'//process.env.ETORO_SUBSCRIPTION_KEY
+          'Ocp-Apim-Subscription-Key': process.env.ETORO_API_KEY
         }
       }
     );
