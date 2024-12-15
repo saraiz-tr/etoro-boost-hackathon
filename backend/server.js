@@ -378,13 +378,7 @@ app.post("/api/getSuggestedPosts", async (req, res) => {
   res.json({ result });
 });
 
-app.get("/api/getSuggestedPosts", async (req, res) => {
-  const userName = req.query.userName;
-  if (userName === undefined) {
-    res.json({ error: "Invalid input: userName" });
-    return;
-  }
-  let result = [];
+async function getSuggestedPostsPrompt(userName) {
   try {
     const portfolioData = await fetchPortfolioData(userName);
     const positionsText = portfolioData?.positions.map((pos) => {
@@ -407,6 +401,33 @@ app.get("/api/getSuggestedPosts", async (req, res) => {
     don't return any prices. 
     try to generate at least one poll about market changes. add @eToro in the end of each post.${positionsPrompt}`;
 
+    return prompt;
+  } catch (error) {
+    console.error("Error connecting to Twitter API:", error);
+    res.json({ error: error.message });
+    return;
+  }
+}
+
+app.get("/api/getSuggestedPostsPrompt", async (req, res) => {
+  const userName = req.query.userName;
+  if (userName === undefined) {
+    res.json({ error: "Invalid input: userName" });
+    return;
+  }
+  const result = await getSuggestedPostsPrompt(userName);
+  res.json({ result });
+});
+
+app.get("/api/getSuggestedPosts", async (req, res) => {
+  const userName = req.query.userName;
+  if (userName === undefined) {
+    res.json({ error: "Invalid input: userName" });
+    return;
+  }
+  let result = [];
+  try {
+    const prompt = await getSuggestedPostsPrompt(userName);
     result = await generatePostsByAI(prompt);
   } catch (error) {
     console.error("Error connecting to Twitter API:", error);
