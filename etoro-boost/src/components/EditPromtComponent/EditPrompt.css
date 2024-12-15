@@ -1,5 +1,6 @@
 /* EditPrompt.css */
 .edit-prompt-container {
+  height: 100vh;
   background-color: #343a40; /* Dark background */
   color: white; /* White text */
   padding: 20px;

@@ -7,7 +7,7 @@ import "./Dashboard.css"; // Ensure this CSS file is properly styled
 import { ChevronRight } from "react-bootstrap-icons"; // Importing chevron icons
 import { useNavigate } from 'react-router-dom';
 import EditModal from '../EditModalComponent/EditModal'; // Import the EditModal component
-import { fetchSuggestedPosts, postToX, postToEtoro } from '../../services/PostsService'; // Import the service functions
+import { fetchSuggestedPosts, postToX, postToEtoro, getSuggestedPostsPrompt } from '../../services/PostsService'; // Import the service functions
 
 const DashboardComponent: React.FC = () => {
   const [data, setData] = useState<string[]>([]);
@@ -31,7 +31,7 @@ const DashboardComponent: React.FC = () => {
 
     const username: string = getLoginData().username;
     try {
-      const data = await fetchSuggestedPosts(username);
+      const data = await fetchSuggestedPosts(username, getSuggestedPostsPrompt());
       setData(data.result); // Store the result in state
       setLoading(false); // Set loading to false after fetching data
     } catch (e) {

@@ -16,7 +16,7 @@ export const Login = () => {
 
   const goToDashboard = () => {
     // Check first the both twitter and eToro are logged in
-    navigate('/dashboard');
+    navigate('/edit-prompt');
   };
 
   const handleLoginX = async () => {

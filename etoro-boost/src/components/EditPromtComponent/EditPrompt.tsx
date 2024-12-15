@@ -1,22 +1,44 @@
 // EditPrompt.tsx
 import React, { useRef, useEffect } from 'react';
 import './EditPrompt.css';
+import { getUserPrompt, setSuggestedPostsPrompt } from '../../services/PostsService';
+import { isAuthenticated } from '../../services/LoginData';
+import { useNavigate } from 'react-router-dom';
 
 const EditPrompt: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (textareaRef.current) {
-      adjustTextareaHeight();
-    }
+    init()
+    .then(() => {
+      getUserPrompt()
+      .then((prompt) => {
+        // Set the prompt in the textarea
+        textareaRef.current!.value = prompt.result;
+        adjustTextareaHeight();
+      });
+    });
   }, []);
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`; // 200px is the max height
+      textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, 200)}px`; // 200px is the min height
     }
   };
+
+  const init = async () => {
+    const isUserAuthenticated = await isAuthenticated();
+    if (!isUserAuthenticated) {
+      navigate('/login');
+      return;
+    }
+  }
+
+  const handleGeneratePosts = async () => {
+    setSuggestedPostsPrompt(textareaRef.current!.value);
+    navigate('/dashboard');
+  }
 
   return (
     <div className="bg-dark edit-prompt-container">
@@ -26,9 +48,13 @@ const EditPrompt: React.FC = () => {
         onChange={adjustTextareaHeight}
         className="form-control"
         rows={10}
-        style={{ maxHeight: '200px', overflow: 'auto' }} // 200px is the max height
       />
-      <button className="btn btn-primary generate-posts-button">Generate Posts</button>
+      <button
+        className="btn btn-primary generate-posts-button"
+        onClick={handleGeneratePosts}
+      >
+        Generate Posts
+      </button>
     </div>
   );
 };
