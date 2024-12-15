@@ -107,7 +107,7 @@ app.get("/auth/twitter/callback", async (req, res) => {
     }
     console.log("Authentication successful", { userId: user.username }); 
     
-    res.redirect(`${CALLBACK_DOMAIN}dashboard`);
+    res.redirect(`${CALLBACK_DOMAIN}login`);
   } catch (error) {
     console.log("Authentication error", { error: error.message }, true);
     // res.redirect("/?error=" + encodeURIComponent("Authentication failed")); TODO

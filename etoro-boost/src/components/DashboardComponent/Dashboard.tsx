@@ -1,7 +1,6 @@
 // Dashboard.tsx
 import React, { useEffect, useState } from "react";
-import { getLoginData, isAuthenticated, setXData } from "../../services/LoginData";
-import { Modal, Button } from "react-bootstrap";
+import { getLoginData, isAuthenticated } from "../../services/LoginData";
 import Skeleton from "react-loading-skeleton"; // Ensure this is installed
 import "react-loading-skeleton/dist/skeleton.css";
 import "./Dashboard.css"; // Ensure this CSS file is properly styled
@@ -24,31 +23,21 @@ const DashboardComponent: React.FC = () => {
   const loginData = getLoginData();
 
   const init = async () => {
-    fetch(`${domain}auth/user`).then(response => response.json()).then(async (response) => { 
-      if (response.error) {
-        setXData(false);
-        navigate('/login');
-        return;
-      }
-      setXData(true);
-      console.log('error', response);
+    const isUserAuthenticated = await isAuthenticated();
+    if (!isUserAuthenticated) {
+      navigate('/login');
+      return;
+    }
 
-      if (!isAuthenticated()) {
-        // User is not authenticated
-        navigate('/login');
-        return;
-      }
-  
-      const username: string = getLoginData().username;
-      try {
-        const data = await fetchSuggestedPosts(username);
-        setData(data.result); // Store the result in state
-        setLoading(false); // Set loading to false after fetching data
-      } catch (e) {
-        console.error("There was an error making the request!", e);
-        setLoading(false); // Ensure loading state is updated on error
-      }
-    })
+    const username: string = getLoginData().username;
+    try {
+      const data = await fetchSuggestedPosts(username);
+      setData(data.result); // Store the result in state
+      setLoading(false); // Set loading to false after fetching data
+    } catch (e) {
+      console.error("There was an error making the request!", e);
+      setLoading(false); // Ensure loading state is updated on error
+    }
   }
 
   useEffect(() => {

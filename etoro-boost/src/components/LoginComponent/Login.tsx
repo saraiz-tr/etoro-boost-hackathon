@@ -17,30 +17,26 @@ export const Login = () => {
   const goToDashboard = () => {
     // Check first the both twitter and eToro are logged in
     navigate('/dashboard');
-    //alert("is eToro logged in?", isAuthenticated());
   };
 
   const handleLoginX = async () => {
     // Redirect to the Twitter authentication route on the server
     window.location.href = `${domain}auth/twitter`;
   };
-  useEffect(() => {
-    // Check if the user is logged it
-    asserteToroLoggedin();
-    if (getLoginData().token) {
-      setEtoroLoggedIn(true);
-    }
 
-    assertIsXLoggedin().then(() => {
-      if (getIsXLoggedin()) {
-        setXLoggedIn(true);
-      }
-  
-      if (isAuthenticated()) {
-        goToDashboard();
-      }
-    });
-    
+const autoLogin = async () => {
+  const isUserAuthenticated = await isAuthenticated();
+  if (isUserAuthenticated) {
+    goToDashboard();
+  } else {
+    setEtoroLoggedIn(!!getLoginData()?.token);
+    setXLoggedIn(getIsXLoggedin());
+  }
+};
+
+  useEffect(() => {
+    // automatic login user who already logged in
+    autoLogin();
   }, []);
 
   return (
@@ -83,7 +79,6 @@ export const Login = () => {
             Login With X
             {xLoggedIn && (
               <span className="success-indicator">
-                {/* <i className="bi bi-check-circle-fill"></i> */}
                 <i className="bi bi-check-circle-fill"></i> {/* Bootstrap icon */}
               </span>
             )}
@@ -96,7 +91,7 @@ export const Login = () => {
           onLoginSuccess={(token: string, xCsrfToken: string, username: string) => {
             setLoginData({ token, xCsrfToken, username });
             setEtoroLoggedIn(true);
-            goToDashboard();
+            autoLogin();
           }}
         />
       </div>
