@@ -25,7 +25,7 @@ const EditPrompt: React.FC = () => {
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
       requestAnimationFrame(() => {
-        textareaRef.current!.style.height = `${textareaRef.current!.scrollHeight + 20}px`;
+        textareaRef.current!.style.height = `${textareaRef.current!.scrollHeight}px`;
       });
     }
   };
