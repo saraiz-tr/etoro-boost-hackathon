@@ -1,11 +1,10 @@
 let loginData: LoginData;
-let isXLoggedin: boolean;
+let isXLoggedin: boolean | undefined;
 
 const getLoginData = () => loginData;
 const getIsXLoggedin = () => isXLoggedin;
 
-const setXData = (isLoggedIn: boolean) => {
-  //localStorage.setItem('isXLoggedin', JSON.stringify(isLoggedIn));
+const setXData = (isLoggedIn: boolean | undefined) => {
   isXLoggedin = isLoggedIn;
 }
 
@@ -19,7 +18,7 @@ const domain = process.env.REACT_APP_SERVER_DOMAIN;
 export const isAuthenticated = async () => {
   let iseToroLoggedIn = false;
   // Check first if loginData was initialized in memory
-  if (!loginData) {
+  if (!loginData?.token) {
     iseToroLoggedIn = asserteToroLoggedin();
   }
 
@@ -42,7 +41,6 @@ export const assertIsXLoggedin = () => {
 };
 
 export const asserteToroLoggedin = () => {
-  // TODO don't forget to check the local storage before parsing it.
   const localStorageData = atob(localStorage.getItem('loginData') || '');
   let parsedLoginData;
 
@@ -57,6 +55,12 @@ export const asserteToroLoggedin = () => {
 
   return !!parsedLoginData?.token;
 };
+
+export const logout = () => {
+  setLoginData({ username: '', token: '', xCsrfToken: '' });
+  setXData(undefined);
+  localStorage.removeItem('loginData');
+}
 
 export interface LoginData {
     username: string;

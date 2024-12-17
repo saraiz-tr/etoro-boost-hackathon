@@ -83,7 +83,7 @@ const DashboardComponent: React.FC = () => {
     <div className="bg-dark text-white p-4">
       {loading ? (
         <div className="tweets-container">
-          <h1>Generating Posts...</h1>
+          <h1 className="dashboard-title">Generating Posts...</h1>
           {[...Array(5)].map(
             (
               _,
@@ -106,7 +106,7 @@ const DashboardComponent: React.FC = () => {
         </div>
       ) : (
           <div className="tweets-container">
-          <h1>Suggested Posts</h1>
+          <h1 className="dashboard-title">Suggested Posts</h1>
           {data.map((tweet, index) => (
             <div
               key={index}

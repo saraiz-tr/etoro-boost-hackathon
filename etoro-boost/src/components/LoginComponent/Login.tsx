@@ -10,7 +10,7 @@ import { assertIsXLoggedin, asserteToroLoggedin, getIsXLoggedin, getLoginData, i
 export const Login = () => {
   const [showEtoroModal, setShowEtoroModal] = useState(false);
   const [etoroLoggedIn, setEtoroLoggedIn] = useState(false);
-  const [xLoggedIn, setXLoggedIn] = useState(false);
+  const [xLoggedIn, setXLoggedIn] = useState<boolean | undefined>(false);
   const navigate = useNavigate();
   const domain = process.env.REACT_APP_SERVER_DOMAIN;
 

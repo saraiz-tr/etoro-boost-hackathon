@@ -4,6 +4,7 @@ import './EditPrompt.css';
 import { getUserPrompt, setSuggestedPostsPrompt } from '../../services/PostsService';
 import { isAuthenticated } from '../../services/LoginData';
 import { useNavigate } from 'react-router-dom';
+import { Button } from 'react-bootstrap';
 
 const EditPrompt: React.FC = () => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -23,7 +24,9 @@ const EditPrompt: React.FC = () => {
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, 200)}px`; // 200px is the min height
+      requestAnimationFrame(() => {
+        textareaRef.current!.style.height = `${textareaRef.current!.scrollHeight + 20}px`;
+      });
     }
   };
 
@@ -46,15 +49,24 @@ const EditPrompt: React.FC = () => {
       <textarea
         ref={textareaRef}
         onChange={adjustTextareaHeight}
-        className="form-control"
+        className="form-control prompt-textarea"
         rows={10}
       />
-      <button
+      <Button
+          type="submit"
+          // className="auth-button etoro-button"
+          className="btn btn-primary generate-posts-button"
+          // disabled={loading}
+          onClick={handleGeneratePosts}
+        >
+          Generate Posts
+        </Button>
+      {/* <button
         className="btn btn-primary generate-posts-button"
         onClick={handleGeneratePosts}
       >
         Generate Posts
-      </button>
+      </button> */}
     </div>
   );
 };
