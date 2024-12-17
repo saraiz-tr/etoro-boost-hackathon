@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const authRoutes = require("./routes/auth");
 const moment = require("moment");
+const path = require("path");
 
 const AIType = {
   AzureOpenAI: "AzureOpenAI",
@@ -519,7 +520,16 @@ app.post("/api/postOnX", async (req, res) => {
 //   res.redirect('/login');
 // });
 
-app.listen(PORT, async () => {
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, "../etoro-boost/build")));
+
+// Handle React routing, return all requests to React app
+app.get("*", (req, res) => {
+  // This needs to be AFTER your API routes
+  res.sendFile(path.join(__dirname, "../etoro-boost/build", "index.html"));
+});
+
+app.listen(PORT, '0.0.0.0', async () => {
   const instrumentsResponse = await axios.get(
     `${process.env.ETORO_API_URL}Metadata/V1/Instruments`,
     { headers: { "Ocp-Apim-Subscription-Key": process.env.ETORO_API_KEY } }
