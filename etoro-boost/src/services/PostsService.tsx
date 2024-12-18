@@ -33,11 +33,12 @@ export const postToEtoro = async (post: any, loginData: any) => {
   await fetch(`${domain}api/postsOnEtoro?username=${username}`, { 
     method: 'POST', 
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'token': loginData.token,
+      'xCsrfToken': loginData.xCsrfToken 
     }, 
     body: JSON.stringify({
-      content: post,
-      loginData
+      content: post
     })
   });
 };
