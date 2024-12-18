@@ -1,4 +1,7 @@
 .tweets-container {
+    margin: 0 auto;
+    width: 50%;
+    min-width: 600px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -35,4 +38,11 @@
 
 .dashboard-title {
     margin: 0 auto 10px;
+}
+
+@media (max-width: 768px) {
+    .tweets-container {
+        min-width: auto;
+        width: 100%;
+    }
 }

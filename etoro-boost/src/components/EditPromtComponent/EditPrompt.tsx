@@ -25,7 +25,11 @@ const EditPrompt: React.FC = () => {
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
       requestAnimationFrame(() => {
-        textareaRef.current!.style.height = `${textareaRef.current!.scrollHeight}px`;
+        const currentHeight = textareaRef.current!.style.height ? parseInt(textareaRef.current!.style.height) : 0;
+        const scrollHeight = textareaRef.current!.scrollHeight;
+        if (!currentHeight || scrollHeight > currentHeight) {
+          textareaRef.current!.style.height = `${textareaRef.current!.scrollHeight}px`;
+        }
       });
     }
   };
@@ -54,19 +58,11 @@ const EditPrompt: React.FC = () => {
       />
       <Button
           type="submit"
-          // className="auth-button etoro-button"
           className="btn btn-primary generate-posts-button"
-          // disabled={loading}
           onClick={handleGeneratePosts}
         >
           Generate Posts
         </Button>
-      {/* <button
-        className="btn btn-primary generate-posts-button"
-        onClick={handleGeneratePosts}
-      >
-        Generate Posts
-      </button> */}
     </div>
   );
 };
