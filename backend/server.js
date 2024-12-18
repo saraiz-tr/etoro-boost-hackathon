@@ -37,7 +37,14 @@ const CLIENT_URL="http://localhost:3000";
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: CALLBACK_DOMAIN.replace(/\/$/, ""), credentials: true }));
+
+let domainForCors = process.env.CALLBACK_DOMAIN;
+if (domainForCors.length > 1 && domainForCors.slice(-1) === "/") {
+  domainForCors = domainForCors.slice(0, -1);
+}
+
+app.use(cors({ origin: domainForCors, credentials: true }));
+
 app.use(cookieParser());
 app.use(session({
   secret: X_SESSION_SECRET, // This should be an environment variable for security
