@@ -10,6 +10,7 @@ const AzureOpenAIService = require("./services/AzureOpenAIService");
 const EtoroService = require("./services/EtoroService");
 const XAIService = require("./services/XAIService");
 const dbService = require("./db/DBService");
+const path = require("path");
 
 const azureOpenAIService = new AzureOpenAIService();
 const eToroService = new EtoroService();
@@ -31,9 +32,12 @@ const PORT = process.env.PORT || 4000;
 
 const app = express();
 app.use(express.json());
-app.use(
-  cors({ origin: CALLBACK_DOMAIN.replace(/\/$/, ""), credentials: true })
-);
+let domainForCors = process.env.CALLBACK_DOMAIN;
+if (domainForCors.length > 1 && domainForCors.slice(-1) === "/") {
+  domainForCors = domainForCors.slice(0, -1);
+}
+
+app.use(cors({ origin: domainForCors, credentials: true }));
 
 app.use(cookieParser());
 app.use(
@@ -339,7 +343,16 @@ app.get("/api/getFromDB", async (req, res) => {
   }
 });
 
-app.listen(PORT, async () => {
+// Serve static files from the React build directory
+app.use(express.static(path.join(__dirname, "../etoro-boost/build")));
+
+// Handle React routing, return all requests to React app
+app.get("*", (req, res) => {
+  // This needs to be AFTER your API routes
+  res.sendFile(path.join(__dirname, "../etoro-boost/build", "index.html"));
+});
+
+app.listen(PORT, '0.0.0.0', async () => {
   instruments = await eToroService.getInstruments();
   console.log(`Server is running on http://localhost:${PORT}`);
 });
