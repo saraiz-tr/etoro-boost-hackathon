@@ -38,12 +38,11 @@ const CLIENT_URL="http://localhost:3000";
 const app = express();
 app.use(express.json());
 
-let domainForCors = process.env.CALLBACK_DOMAIN;
-if (domainForCors.length > 1 && domainForCors.slice(-1) === "/") {
-  domainForCors = domainForCors.slice(0, -1);
+const corsConfig = { origin: process.env.CALLBACK_DOMAIN, credentials: true };
+if (process.env.NODE_ENV === "development") {
+  corsConfig.origin = true;
 }
-
-app.use(cors({ origin: domainForCors, credentials: true }));
+app.use(cors(corsConfig));
 
 app.use(cookieParser());
 app.use(session({
