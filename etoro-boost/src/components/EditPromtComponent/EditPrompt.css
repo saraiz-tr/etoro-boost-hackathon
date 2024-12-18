@@ -1,0 +1,66 @@
+/* EditPrompt.css */
+.edit-prompt-container {
+  height: 100vh;
+  background-color: #343a40; /* Dark background */
+  color: white; /* White text */
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.edit-prompt-container h1 {
+  margin-bottom: 20px;
+}
+
+.edit-prompt-container textarea {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #495057; /* Darker background for textarea */
+  color: white; /* White text */
+}
+
+.generate-posts-button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: none;
+  background-color: #F6F6F6;
+  color: green;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.form-control {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-color);
+  padding: 12px;
+}
+
+.form-control:focus {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-color);
+  color: var(--text-color);
+  box-shadow: none;
+}
+
+.prompt-textarea {
+  overflow: auto;
+  min-height: 200px;
+  max-height: 600px;
+}
+
+@media (max-width: 768px) {
+  .generate-posts-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    width: calc(100% - 40px);
+  }
+}

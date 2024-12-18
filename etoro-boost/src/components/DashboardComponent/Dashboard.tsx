@@ -1,11 +1,13 @@
+// Dashboard.tsx
 import React, { useEffect, useState } from "react";
-import { getLoginData, isAuthenticated, setXData } from "../../services/LoginData";
-import { Modal, Button } from "react-bootstrap";
+import { getLoginData, isAuthenticated } from "../../services/LoginData";
 import Skeleton from "react-loading-skeleton"; // Ensure this is installed
 import "react-loading-skeleton/dist/skeleton.css";
 import "./Dashboard.css"; // Ensure this CSS file is properly styled
-import { ChevronRight, ChevronLeft } from "react-bootstrap-icons"; // Importing chevron icons
+import { ChevronRight } from "react-bootstrap-icons"; // Importing chevron icons
 import { useNavigate } from 'react-router-dom';
+import EditModal from '../EditModalComponent/EditModal'; // Import the EditModal component
+import { fetchSuggestedPosts, postToX, postToEtoro, getSuggestedPostsPrompt } from '../../services/PostsService'; // Import the service functions
 
 const DashboardComponent: React.FC = () => {
   const [data, setData] = useState<string[]>([]);
@@ -20,68 +22,27 @@ const DashboardComponent: React.FC = () => {
   
   const loginData = getLoginData();
 
-  const postToX = (post: any) => {
-    fetch(`${domain}api/postOnX`, { 
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json'
-      }, 
-      body: JSON.stringify({
-        content: post
-      })
-    })    
-  };
+  const init = async () => {
+    const isUserAuthenticated = await isAuthenticated();
+    if (!isUserAuthenticated) {
+      navigate('/login');
+      return;
+    }
 
-  const postToEtoro = (post: any) => {
     const username: string = getLoginData().username;
-    fetch(`${domain}api/postsOnEtoro?username=${username}`, { 
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json'
-      }, 
-      body: JSON.stringify({
-        content: post,
-        loginData
-      })
-    })    
+    try {
+      const data = await fetchSuggestedPosts(username, getSuggestedPostsPrompt());
+      setData(data.result); // Store the result in state
+      setLoading(false); // Set loading to false after fetching data
+    } catch (e) {
+      console.error("There was an error making the request!", e);
+      setLoading(false); // Ensure loading state is updated on error
+    }
   }
-
-   
 
   useEffect(() => {
     // Check if user is authenticated
-
-    fetch(`${domain}auth/user`).then(response => response.json()).then((response) => { 
-      if (response.error) {
-        setXData(false);
-        navigate('/login');
-        return;
-      }
-      setXData(true);
-      console.log('error', response);
-
-      if (!isAuthenticated()) {
-        // User is not authenticated
-        navigate('/login');
-        return;
-      }
-  
-      const username: string = getLoginData().username;
-      fetch(`${domain}api/getSuggestedPosts?userName=${username}`)
-        .then(response => response.json())
-        .then(data => {
-          console.log("result", data);
-          setData(data.result); // Store the result in state
-          setLoading(false); // Set loading to false after fetching data
-        })
-        .catch((error) => {
-          console.error("There was an error making the request!", error);
-          setLoading(false); // Ensure loading state is updated on error
-        });
-
-    })
-   
-   
+    init();
   }, []);
 
   const handleEdit = (tweet: string, index: number) => {
@@ -99,7 +60,7 @@ const DashboardComponent: React.FC = () => {
     }
 
     if (iseToroSelected) {
-      await postToEtoro(selectedTweet);
+      await postToEtoro(selectedTweet, loginData);
     }
     setShowModal(false); // Close the modal
     setPostedTweets([...postedTweets, tweetIndex!]);
@@ -122,7 +83,7 @@ const DashboardComponent: React.FC = () => {
     <div className="bg-dark text-white p-4">
       {loading ? (
         <div className="tweets-container">
-          <h1>Generating Posts...</h1>
+          <h1 className="dashboard-title">Generating Posts...</h1>
           {[...Array(5)].map(
             (
               _,
@@ -145,7 +106,7 @@ const DashboardComponent: React.FC = () => {
         </div>
       ) : (
           <div className="tweets-container">
-          <h1>Suggested Posts</h1>
+          <h1 className="dashboard-title">Suggested Posts</h1>
           {data.map((tweet, index) => (
             <div
               key={index}
@@ -171,77 +132,16 @@ const DashboardComponent: React.FC = () => {
       )}
 
       {/* Modal for editing tweet */}
-      <Modal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header>
-          <button
-            className="close-modal-btn btn btn-link"
-            onClick={() => setShowModal(false)}
-            aria-label="Close"
-          >
-            <ChevronLeft />
-          </button>
-          <Modal.Title>Edit Post</Modal.Title>
-          <Button
-            variant="primary"
-            onClick={handlePost}
-            disabled={isPostDisabled}
-            className="post-button ml-auto"
-          >
-            Post
-          </Button>
-        </Modal.Header>
-        <Modal.Body>
-          <textarea
-            value={selectedTweet || ""}
-            onChange={(e) => setSelectedTweet(e.target.value)}
-            className="form-control"
-            rows={5}
-          />
-          <hr /> {/* Thin border */}
-          <h5 className="mt-2">Post in</h5> {/* Title */}
-          <div className="mb-3">
-            <div>
-              <button
-                type="submit"
-                className={`network-button  ${selectedPlatforms.includes("eToro") ? "btn-light-green" : ""} btn-primary mx-2`}
-                onClick={() => handlePlatformSelect("eToro")}
-              >
-                <span>eToro</span>
-                <div className="button-icon">
-                  {selectedPlatforms.includes("eToro") ? (
-                      <i className="bi bi-x-circle"></i>
-                    ) : (
-                      <i className="bi bi-plus-circle"></i>
-                    )}  
-                </div>
-                
-                
-              </button>
-              <button
-                type="submit"
-                className={`network-button  ${selectedPlatforms.includes("X") ? "btn-light-green" : ""} btn-primary mx-2`}
-                onClick={() => handlePlatformSelect("X")}
-              >
-                <span>X</span>
-                <div className="button-icon">
-                  {selectedPlatforms.includes("X") ? (
-                      <i className="bi bi-x-circle"></i>
-                    ) : (
-                      <i className="bi bi-plus-circle"></i>
-                    )}  
-                </div>
-              </button>
-            </div>
-          </div>
-          {/* Removed Post button from here, it is now in Header */}
-        </Modal.Body>
-      </Modal>
+      <EditModal
+        showModal={showModal}
+        selectedTweet={selectedTweet}
+        selectedPlatforms={selectedPlatforms}
+        isPostDisabled={isPostDisabled}
+        handleClose={() => setShowModal(false)}
+        handlePost={handlePost}
+        handlePlatformSelect={handlePlatformSelect}
+        setSelectedTweet={setSelectedTweet}
+      />
     </div>
   );
 };

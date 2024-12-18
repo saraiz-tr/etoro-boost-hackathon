@@ -13,7 +13,8 @@ router.post('/login/etoro', async (req, res) => {
       });
     }
 
-    const response = await axios.post(`${process.env.ETORO_API_URL}API/Trading/V1/Account/Login`,
+    const response = await axios.post(
+      `${process.env.ETORO_API_URL}api/trading/v1/account/login`,
       { username, password },
       {
         headers: {

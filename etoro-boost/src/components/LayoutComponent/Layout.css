@@ -1,0 +1,8 @@
+.layout {
+    height: 100vh;
+}
+
+.layout-button-container {
+    display: flex;
+    justify-content: flex-end;
+}

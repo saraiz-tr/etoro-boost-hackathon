@@ -1,54 +1,71 @@
-let loginData: LoginData = {} as LoginData;
-let isXLoggedin: boolean = false;
+let loginData: LoginData;
+let isXLoggedin: boolean | undefined;
 
 const getLoginData = () => loginData;
 const getIsXLoggedin = () => isXLoggedin;
 
-const setXData = (isLoggedIn: boolean) => {
-  localStorage.setItem('isXLoggedin', JSON.stringify(isLoggedIn));
+const setXData = (isLoggedIn: boolean | undefined) => {
   isXLoggedin = isLoggedIn;
 }
 
 const setLoginData = (data: LoginData) => {
-  localStorage.setItem('loginData', JSON.stringify(data));
+  localStorage.setItem('loginData', btoa(JSON.stringify(data)));
   loginData = data;
 };
 
 const domain = process.env.REACT_APP_SERVER_DOMAIN;
 
-export { getLoginData, setLoginData, setXData, getIsXLoggedin };
-
-export const isAuthenticated = () => {
-  const localStorageData = localStorage.getItem('loginData');
-  const xlocalStorageData = localStorage.getItem('isXLoggedin');
-  if (localStorageData && !getLoginData().token && xlocalStorageData) {
-    setLoginData(JSON.parse(localStorageData));
-    setXData(JSON.parse(xlocalStorageData));
+export const isAuthenticated = async () => {
+  let iseToroLoggedIn = false;
+  // Check first if loginData was initialized in memory
+  if (!loginData?.token) {
+    iseToroLoggedIn = asserteToroLoggedin();
   }
-  return !!getLoginData().token && getIsXLoggedin();
+
+  if (isXLoggedin === undefined) {
+    await assertIsXLoggedin();
+  }
+  
+  return !!getLoginData()?.token && getIsXLoggedin();
 };
 
 export const assertIsXLoggedin = () => {
+  let isLoggedIn = false;
   return fetch(`${domain}auth/user`).then(response => response.json()).then((response) => { 
-    if (response.error) {
-      setXData(false);
-      return;
-    }
-    setXData(true);
+    isLoggedIn = !response.error;
+    setXData(isLoggedIn);
+    return isLoggedIn;
   }).catch((error) => {
-    setXData(false);
+    return false;
   });
 };
 
 export const asserteToroLoggedin = () => {
-  const localStorageData = localStorage.getItem('loginData');
-  if (localStorageData && !getLoginData().token) {
-    setLoginData(JSON.parse(localStorageData));
+  const localStorageData = atob(localStorage.getItem('loginData') || '');
+  let parsedLoginData;
+
+  if (localStorageData && !getLoginData()?.token) {
+    try {
+      parsedLoginData = JSON.parse(localStorageData);
+    } catch (error) {
+    }
+
+    parsedLoginData && setLoginData(parsedLoginData);
   }
+
+  return !!parsedLoginData?.token;
 };
+
+export const logout = () => {
+  setLoginData({ username: '', token: '', xCsrfToken: '' });
+  setXData(undefined);
+  localStorage.removeItem('loginData');
+}
 
 export interface LoginData {
     username: string;
     token: string;
     xCsrfToken: string;
 }
+
+export { getLoginData, setLoginData, getIsXLoggedin };
