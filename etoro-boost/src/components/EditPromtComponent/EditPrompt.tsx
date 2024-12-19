@@ -1,12 +1,15 @@
 // EditPrompt.tsx
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import './EditPrompt.css';
 import { getUserPrompt, setSuggestedPostsPrompt } from '../../services/PostsService';
 import { isAuthenticated } from '../../services/LoginData';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
+import ErrorDialog from '../ErrorDialogComponent/ErrorDialog';
 
 const EditPrompt: React.FC = () => {
+  const [showErrorDialog, setShowErrorDialog] = useState(false); // Error dialog state
+  const [errorMessage, setErrorMessage] = useState(""); // Error message state
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
 
@@ -18,6 +21,10 @@ const EditPrompt: React.FC = () => {
         // Set the prompt in the textarea
         textareaRef.current!.value = prompt.result;
         adjustTextareaHeight();
+      })
+      .catch(() => {
+        setErrorMessage("There was an error fetching the prompt. You can use your own imigintion and write your own prompt ;)");
+        setShowErrorDialog(true);
       });
     });
   }, []);
@@ -62,7 +69,14 @@ const EditPrompt: React.FC = () => {
           onClick={handleGeneratePosts}
         >
           Generate Posts
-        </Button>
+      </Button>
+
+      <ErrorDialog // Include the error dialog here
+          show={showErrorDialog}
+          onHide={() => setShowErrorDialog(false)}
+          errorMessage={errorMessage}
+        />
+        
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { ChevronRight } from "react-bootstrap-icons"; // Importing chevron icons
 import { useNavigate } from 'react-router-dom';
 import EditModal from '../EditModalComponent/EditModal'; // Import the EditModal component
 import { fetchSuggestedPosts, postToX, postToEtoro, getSuggestedPostsPrompt } from '../../services/PostsService'; // Import the service functions
+import ErrorDialog from "../ErrorDialogComponent/ErrorDialog";
 
 const DashboardComponent: React.FC = () => {
   const [data, setData] = useState<string[]>([]);
@@ -16,6 +17,8 @@ const DashboardComponent: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false); // Modal state
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["eToro", "X"]); // Allow multiple selections
+  const [showErrorDialog, setShowErrorDialog] = useState(false); // Error dialog state
+  const [errorMessage, setErrorMessage] = useState(""); // Error message state
   const navigate = useNavigate();
   const domain = process.env.REACT_APP_SERVER_DOMAIN;
   const [postedTweets, setPostedTweets] = useState<number[]>([]);
@@ -37,6 +40,8 @@ const DashboardComponent: React.FC = () => {
     } catch (e) {
       console.error("There was an error making the request!", e);
       setLoading(false); // Ensure loading state is updated on error
+      setErrorMessage("There was an error fetching the suggested posts. Please try again later.");
+      setShowErrorDialog(true);
     }
   }
 
@@ -142,6 +147,14 @@ const DashboardComponent: React.FC = () => {
         handlePlatformSelect={handlePlatformSelect}
         setSelectedTweet={setSelectedTweet}
       />
+      <ErrorDialog // Include the error dialog here
+          show={showErrorDialog}
+          onHide={() => {
+            setShowErrorDialog(false);
+            navigate('/login');
+          }}
+          errorMessage={errorMessage}
+        />
     </div>
   );
 };
