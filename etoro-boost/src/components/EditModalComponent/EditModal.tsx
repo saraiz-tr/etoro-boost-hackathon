@@ -13,6 +13,7 @@ interface EditModalProps {
   handlePost: () => void;
   handlePlatformSelect: (platform: string) => void;
   setSelectedTweet: (tweet: string) => void;
+  errorMessage: string | null; // Add error message prop
 }
 
 const EditModal: React.FC<EditModalProps> = ({
@@ -24,6 +25,7 @@ const EditModal: React.FC<EditModalProps> = ({
   handlePost,
   handlePlatformSelect,
   setSelectedTweet,
+  errorMessage // Add error message prop
 }) => {
   return (
     <Modal
@@ -46,12 +48,13 @@ const EditModal: React.FC<EditModalProps> = ({
           variant="primary"
           onClick={handlePost}
           disabled={isPostDisabled}
-          className="post-button ml-auto"
+          className="mobile post-button ml-auto"
         >
           Post
         </Button>
       </Modal.Header>
       <Modal.Body>
+      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} {/* Render error message */}
         <textarea
           value={selectedTweet || ""}
           onChange={(e) => setSelectedTweet(e.target.value)}
@@ -93,6 +96,23 @@ const EditModal: React.FC<EditModalProps> = ({
           </div>
         </div>
       </Modal.Body>
+      <Modal.Footer className="desktop">
+        <Button
+          variant="secondary"
+          onClick={handleClose}
+          className="cancel-button"
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handlePost}
+          disabled={isPostDisabled}
+          className="post-button"
+        >
+          Post
+        </Button>
+      </Modal.Footer>
     </Modal>
   );
 };

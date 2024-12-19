@@ -43,6 +43,12 @@
     font-weight: 600;
 }
 
+.cancel-button {
+    border-radius: 20px;
+    width: 80px;
+    font-weight: 600;
+}
+
 .button-icon {
     color: black;
     position: absolute;
@@ -78,6 +84,14 @@
     justify-content: space-between;
 }
 
+.mobile {
+    display: none;
+}
+
+.desktop {
+    display: flex;
+}
+
 @media (max-width: 576px) {
   .modal-dialog {
     max-width: 100%;
@@ -87,5 +101,13 @@
     .modal-content {
         height: 100%; /* Allow it to take full height */
     }
+  }
+    
+  .mobile {
+    display: block;
+  }
+
+  .desktop {
+    display: none;
   }
 }

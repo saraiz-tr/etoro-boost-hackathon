@@ -19,6 +19,7 @@ const DashboardComponent: React.FC = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(["eToro", "X"]); // Allow multiple selections
   const [showErrorDialog, setShowErrorDialog] = useState(false); // Error dialog state
   const [errorMessage, setErrorMessage] = useState(""); // Error message state
+  const [modalErrorMessage, setModalErrorMessage] = useState<string | null>(null); // Modal error message state
   const navigate = useNavigate();
   const domain = process.env.REACT_APP_SERVER_DOMAIN;
   const [postedTweets, setPostedTweets] = useState<number[]>([]);
@@ -45,6 +46,11 @@ const DashboardComponent: React.FC = () => {
     }
   }
 
+  const initializeEditPostDialog = async () => {
+    setModalErrorMessage(null);
+    setSelectedPlatforms(["eToro", "X"]);
+  }
+
   useEffect(() => {
     // Check if user is authenticated
     init();
@@ -57,18 +63,38 @@ const DashboardComponent: React.FC = () => {
   };
 
   const handlePost = async () => {
-    const isxSelected = selectedPlatforms.includes('X')
-    const iseToroSelected = selectedPlatforms.includes('eToro')
+    initializeEditPostDialog();
 
+    const isxSelected = selectedPlatforms.includes('X');
+    const iseToroSelected = selectedPlatforms.includes('eToro');
+  
+    const promises = [];
+  
     if (isxSelected) {
-      await postToX(selectedTweet);
+      promises.push(postToX(selectedTweet));
     }
-
+  
     if (iseToroSelected) {
-      await postToEtoro(selectedTweet, loginData);
+      promises.push(postToEtoro(selectedTweet, loginData));
     }
-    setShowModal(false); // Close the modal
-    setPostedTweets([...postedTweets, tweetIndex!]);
+  
+    const results = await Promise.allSettled(promises);
+  
+    const errors = results
+      .map((result, index) => {
+        if (result.status === 'rejected') {
+          return index === 0 && isxSelected ? 'X' : 'eToro';
+        }
+        return null;
+      })
+      .filter(Boolean);
+  
+    if (errors.length > 0) {
+      setModalErrorMessage(`Failed to post to: ${errors.join(', ')}. Please try again later.`);
+    } else {
+      setShowModal(false); // Close the modal
+      setPostedTweets([...postedTweets, tweetIndex!]);
+    }
   };
 
   // Handle the platform selection
@@ -142,10 +168,14 @@ const DashboardComponent: React.FC = () => {
         selectedTweet={selectedTweet}
         selectedPlatforms={selectedPlatforms}
         isPostDisabled={isPostDisabled}
-        handleClose={() => setShowModal(false)}
+        handleClose={() => {
+          setShowModal(false);
+          initializeEditPostDialog();
+        }}
         handlePost={handlePost}
         handlePlatformSelect={handlePlatformSelect}
         setSelectedTweet={setSelectedTweet}
+        errorMessage={modalErrorMessage} // Pass the error message to the modal
       />
       <ErrorDialog // Include the error dialog here
           show={showErrorDialog}
