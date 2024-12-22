@@ -31,7 +31,9 @@ export const isAuthenticated = async () => {
 
 export const assertIsXLoggedin = () => {
   let isLoggedIn = false;
-  return fetch(`${domain}auth/user`).then(response => response.json()).then((response) => { 
+  return fetch(`${domain}auth/user`, {
+    credentials: 'include'
+  }).then(response => response.json()).then((response) => { 
     isLoggedIn = !response.error;
     setXData(isLoggedIn);
     return isLoggedIn;

@@ -27,7 +27,6 @@ const Platform = {
 };
 
 const USE_AI = AIType.XAI;
-const { CALLBACK_DOMAIN, X_SESSION_SECRET } = process.env;
 const PORT = process.env.PORT || 4000;
 
 const app = express();
@@ -39,9 +38,9 @@ if (process.env.NODE_ENV === "development") {
 app.use(cors(corsConfig));
 
 app.use(cookieParser());
-app.use(
+app.use( // TODO check without it
   session({
-    secret: X_SESSION_SECRET, // This should be an environment variable for security
+    secret: process.env.X_SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }, // Set to true in production for HTTPS
@@ -159,15 +158,15 @@ async function getSuggestedPostsPrompt(userName) {
 
     const positionsPrompt =
       positionsText !== undefined
-        ? ` This is my portfolio percent allocation per asset: ${positionsText.join(
+        ? `This is my portfolio percent allocation per asset: ${positionsText.join(
             ", "
           )}`
         : "";
-    const prompt = `Create 5 engaging and concise tweets for traders or investors audience about the latest assets. 
-    Use an enthusiastic and professional tone, include 1-2 cashtags per post, and aim to spark conversations Make the text eye-catching. 
-    The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours.
-    don't return any prices. 
-    try to generate at least one poll about market changes. add @eToro in the end of each post.${positionsPrompt}`;
+    const prompt = `Create 5 engaging and concise tweets for traders or investors audience about the latest assets.
+Use an enthusiastic and professional tone, include 1-2 cashtags per post, and aim to spark conversations Make the text eye-catching.
+The tweet should contain current asset prices and references to: news, articles, financial reports from the last 24 hours.
+Don't return any prices. Try to generate at least one poll about market changes. add @eToro in the end of each post.
+${positionsPrompt}`;
 
     return prompt;
   } catch (error) {
@@ -205,40 +204,15 @@ app.get("/api/getSuggestedPosts", async (req, res) => {
   res.json({ result });
 });
 
-function getUserDataFromCookie(req) {
-  const sessions = Object.values(req.sessionStore?.sessions);
-  const filteredSessions = sessions?.filter((item) =>
-    item.includes("twitterState")
-  );
-  if (filteredSessions && filteredSessions.length !== 1) {
-    // res.status(401).json({ error: "Unauthorized" });
-    return null;
-  }
-  const sessionData = JSON.parse(filteredSessions[0]);
-  return sessionData;
-}
-
 app.post("/api/postOnX", async (req, res) => {
   const content = req?.body?.content;
   if (content === undefined || content === "" || content === null) {
-    res.json({ result: "Invalid content" });
+    return res.json({ result: "Invalid content" });
   }
   try {
-    const sessionData = getUserDataFromCookie(req);
-    // const loggedClient = mapUserToToken[sessionData.userName]?.loggedClient;
-    // const loggedClient2 = sessionData?.userClient;
-    // const { data: user } = await loggedClient?.v2?.me();
-    const loggedClient = new TwitterApi(
-      sessionData?.userClient._requestMaker.bearerToken
-    );
+    const accessToken = req?.cookies?.xAccessToken;
+    const loggedClient = new TwitterApi(accessToken);
     const { data: user } = await loggedClient?.v2?.me();
-    if (user.username !== sessionData.userName) {
-      res.json({
-        result: `Tweet failed: user.username ${user.username} !== sessionData.userName ${sessionData.userName}`,
-      });
-      return;
-    }
-
     let response;
     if (content?.includes("Poll Time!")) {
       const contentSplit = content?.split(`\r\n   - `);
@@ -294,10 +268,10 @@ app.post("/api/postOnX", async (req, res) => {
 });
 
 app.get("/api/logout", (req, res) => {
-  //   req.session.destroy(); // TODO test
-  //   req.sessionStore.destroy();
-  //   // TODO clean map
-  //   res.redirect('/login');
+  
+  // Clear the cookie by name (xAccessToken)
+  // res.clearCookie('xAccessToken', { path: '/' });  // Make sure the path matches the original path used for the cookie
+  res.json({ message: 'Logged out success' });
 });
 
 app.post("/api/generateImage", async (req, res) => {

@@ -4,8 +4,6 @@ const DB_NAME = "PostHistory";
 const db = new sqlite3.Database(`db/${DB_NAME}.db`, (err) => {
   if (err) {
     console.error("Error opening database:", err.message);
-  } else {
-    console.log("Connected to the SQLite database.");
   }
 });
 
@@ -30,8 +28,6 @@ class DBService {
     this.db.run(createTableQuery, (err) => {
       if (err) {
         console.error("Error creating table:", err.message);
-      } else {
-        console.log("Posting History table created (if not already exists).");
       }
     });
   }

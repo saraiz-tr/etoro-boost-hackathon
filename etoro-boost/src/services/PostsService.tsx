@@ -24,7 +24,8 @@ export const postToX = async (post: any) => {
     }, 
     body: JSON.stringify({
       content: post
-    })
+    }),
+    credentials: 'include'
   });
 };
 
@@ -39,7 +40,8 @@ export const postToEtoro = async (post: any, loginData: any) => {
     }, 
     body: JSON.stringify({
       content: post
-    })
+    }),
+    credentials: 'include'
   });
 };
 
@@ -49,13 +51,17 @@ export const getUserPrompt = async () => {
     return {};
   }
 
-  const result = await fetch(`${domain}api/getSuggestedPostsPrompt?userName=${username}`)
+  const result = await fetch(`${domain}api/getSuggestedPostsPrompt?userName=${username}`, {
+    credentials: 'include'
+  })
   return result.json();
 }
 
 // Private methods
 const generateWithoutPrompt = async (username: string) => {
-  return await fetch(`${domain}api/getSuggestedPosts?userName=${username}`);
+  return await fetch(`${domain}api/getSuggestedPosts?userName=${username}`, {
+    credentials: 'include'
+  });
 }
 
 const generateWithPrompt = async (username: string, prompt: string) => {
@@ -65,7 +71,8 @@ const generateWithPrompt = async (username: string, prompt: string) => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({ prompt }),
+      credentials: 'include' // Include cookies in the request
     }
   );
 }
