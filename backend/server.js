@@ -270,7 +270,7 @@ app.post("/api/postOnX", async (req, res) => {
 app.get("/api/logout", (req, res) => {
   
   // Clear the cookie by name (xAccessToken)
-  // res.clearCookie('xAccessToken', { path: '/' });  // Make sure the path matches the original path used for the cookie
+  res.clearCookie('xAccessToken'/*, { path: '/', domain: 'localhost' }*/);  // Make sure the path matches the original path used for the cookie
   res.json({ message: 'Logged out success' });
 });
 

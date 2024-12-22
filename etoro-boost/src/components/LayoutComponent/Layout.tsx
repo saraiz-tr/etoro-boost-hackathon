@@ -9,14 +9,10 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    // Clear cookies or local storage
-    //Cookies.remove('twitterToken');
-    //Cookies.remove('twitterTokenSecret');
-    //Cookies.remove('twitterUsername');
+  const handleLogout = async () => {
     // Redirect to login page
+    await logout();
     navigate('/login');
-    logout();
   };
 
   // Hide the logout button on the login page

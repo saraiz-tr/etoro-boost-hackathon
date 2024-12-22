@@ -38,9 +38,9 @@ router.get("/auth/twitter/callback", async (req, res) => {
     console.log("Authentication successful", { userId: user.username });
     const cookieOptions = {
       httpOnly: true,
-      secure: false,
+      secure: process.env.NODE_ENV === "production" ,
       maxAge: expiresIn * 1000,
-      domain: "localhost",
+      // domain: "localhost",
     };
     res.cookie("xAccessToken", accessToken, cookieOptions);
     res.redirect(`${process.env.CALLBACK_DOMAIN}login`);

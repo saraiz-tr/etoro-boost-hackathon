@@ -58,10 +58,17 @@ export const asserteToroLoggedin = () => {
   return !!parsedLoginData?.token;
 };
 
-export const logout = () => {
+export const logout = async () => {
   setLoginData({ username: '', token: '', xCsrfToken: '' });
   setXData(undefined);
   localStorage.removeItem('loginData');
+
+  await fetch(`${domain}api/logout`, {
+    credentials: 'include'
+  }).then(response => response.json())
+  .catch((error) => {
+    return;
+  });
 }
 
 export interface LoginData {
