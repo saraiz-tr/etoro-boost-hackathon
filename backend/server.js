@@ -39,7 +39,7 @@ if (domainForCors.length > 1 && domainForCors.slice(-1) === "/") {
 app.use(cors({ origin: domainForCors, credentials: true }));
 
 app.use(cookieParser());
-app.use(
+app.use( // TODO check without it
   session({
     secret: process.env.X_SESSION_SECRET,
     resave: false,
@@ -272,7 +272,7 @@ app.get("/api/logout", (req, res) => {
   
   // Clear the cookie by name (xAccessToken)
   // res.clearCookie('xAccessToken', { path: '/' });  // Make sure the path matches the original path used for the cookie
-  // res.json({ message: 'Logged out and cookies cleared.' });
+  res.json({ message: 'Logged out success' });
 });
 
 app.post("/api/generateImage", async (req, res) => {
