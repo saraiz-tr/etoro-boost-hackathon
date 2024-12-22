@@ -12,7 +12,8 @@ import ErrorDialog from "../ErrorDialogComponent/ErrorDialog";
 
 const DashboardComponent: React.FC = () => {
   const [data, setData] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
+  const [loading, setLoading] = useState<boolean>(true); // generate suggested posts Loading state
+  const [postToNetworksloading, setPostToNetworksloading] = useState<boolean>(false); // post to eToro/X Loading state
   const [selectedTweet, setSelectedTweet] = useState<string | null>(null); // Selected tweet for editing
   const [showModal, setShowModal] = useState<boolean>(false); // Modal state
   const [tweetIndex, setTweetIndex] = useState<number | null>(null); // Track which tweet is selected for editing
@@ -49,6 +50,7 @@ const DashboardComponent: React.FC = () => {
   const initializeEditPostDialog = async () => {
     setModalErrorMessage(null);
     setSelectedPlatforms(["eToro", "X"]);
+    setPostToNetworksloading(false);
   }
 
   useEffect(() => {
@@ -64,6 +66,7 @@ const DashboardComponent: React.FC = () => {
 
   const handlePost = async () => {
     initializeEditPostDialog();
+    setPostToNetworksloading(true);
 
     const isxSelected = selectedPlatforms.includes('X');
     const iseToroSelected = selectedPlatforms.includes('eToro');
@@ -89,6 +92,8 @@ const DashboardComponent: React.FC = () => {
       })
       .filter(Boolean);
   
+      setPostToNetworksloading(false);
+
     if (errors.length > 0) {
       setModalErrorMessage(`Failed to post to: ${errors.join(', ')}. Please try again later.`);
     } else {
@@ -175,7 +180,8 @@ const DashboardComponent: React.FC = () => {
         handlePost={handlePost}
         handlePlatformSelect={handlePlatformSelect}
         setSelectedTweet={setSelectedTweet}
-        errorMessage={modalErrorMessage} // Pass the error message to the modal
+        errorMessage={modalErrorMessage}
+        loading={postToNetworksloading}
       />
       <ErrorDialog // Include the error dialog here
           show={showErrorDialog}
