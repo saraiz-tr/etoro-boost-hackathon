@@ -1,6 +1,6 @@
 // EditModal.tsx
 import React from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Spinner } from 'react-bootstrap';
 import { ChevronLeft } from 'react-bootstrap-icons';
 import './EditModal.css';
 
@@ -14,6 +14,7 @@ interface EditModalProps {
   handlePlatformSelect: (platform: string) => void;
   setSelectedTweet: (tweet: string) => void;
   errorMessage: string | null; // Add error message prop
+  loading: boolean;
 }
 
 const EditModal: React.FC<EditModalProps> = ({
@@ -25,7 +26,8 @@ const EditModal: React.FC<EditModalProps> = ({
   handlePost,
   handlePlatformSelect,
   setSelectedTweet,
-  errorMessage // Add error message prop
+  errorMessage,
+  loading // Add the loading prop
 }) => {
   return (
     <Modal
@@ -47,22 +49,22 @@ const EditModal: React.FC<EditModalProps> = ({
         <Button
           variant="primary"
           onClick={handlePost}
-          disabled={isPostDisabled}
+          disabled={isPostDisabled || loading}  // Disable if loading
           className="mobile post-button ml-auto"
         >
-          Post
+          {loading ? <Spinner animation="border" size="sm" /> : 'Post'}
         </Button>
       </Modal.Header>
       <Modal.Body>
-      {errorMessage && <div className="alert alert-danger">{errorMessage}</div>} {/* Render error message */}
+        {errorMessage && <div className="alert alert-danger">{errorMessage}</div>}
         <textarea
           value={selectedTweet || ""}
           onChange={(e) => setSelectedTweet(e.target.value)}
           className="form-control"
           rows={10}
         />
-        <hr /> {/* Thin border */}
-        <h5 className="mt-2">Post in</h5> {/* Title */}
+        <hr />
+        <h5 className="mt-2">Post in</h5>
         <div className="mb-3">
           <div className="buttons-container">
             <button
@@ -107,10 +109,10 @@ const EditModal: React.FC<EditModalProps> = ({
         <Button
           variant="primary"
           onClick={handlePost}
-          disabled={isPostDisabled}
+          disabled={isPostDisabled || loading} // Disable if loading
           className="post-button"
         >
-          Post
+          {loading ? <Spinner animation="border" size="sm" /> : 'Post'}
         </Button>
       </Modal.Footer>
     </Modal>
