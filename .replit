@@ -1,0 +1,22 @@
+run = "npm install --prefix backend && npm start --prefix backend & npm install --prefix etoro-boost && npm start --prefix etoro-boost"
+
+# Development will mirror production by building React and serving via backend
+#run = "cd etoro-boost && npm install && npm run build && #cd ../backend && npm install && npm start"
+
+modules = ["nodejs-20"]
+
+[deployment]
+run = ["sh", "-c", "cd backend && npm start"]
+build = [
+  "sh",
+  "-c",
+  "cd etoro-boost && npm install && npm run build && cd ../backend && npm install",
+]
+
+[[ports]]
+localPort = 3000
+externalPort = 3000
+
+[[ports]]
+localPort = 4000
+externalPort = 80
