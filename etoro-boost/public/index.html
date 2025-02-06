@@ -39,5 +39,16 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+      <!-- Add the script below before the closing </body> tag -->
+<script>
+  (function(w, d, s, id) {
+      var js, scripts = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "https://cdn.etorostatic.com/latest/js/embed/etoro-connect/etoro-connect.js";
+      scripts.parentNode.insertBefore(js, scripts);
+      w.eToro = {_c: null,init: function (c){this._c = c;}};
+  }(window, document, 'script', 'etoro-login-embed'));
+</script>
   </body>
 </html>

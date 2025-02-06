@@ -1,6 +1,6 @@
 // Dashboard.tsx
 import React, { useEffect, useState } from "react";
-import { getLoginData, isAuthenticated } from "../../services/LoginData";
+import { getLoginData, isAuthenticated } from "../../services/LoginService";
 import Skeleton from "react-loading-skeleton"; // Ensure this is installed
 import "react-loading-skeleton/dist/skeleton.css";
 import "./Dashboard.css"; // Ensure this CSS file is properly styled

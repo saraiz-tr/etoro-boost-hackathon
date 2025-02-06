@@ -1,4 +1,4 @@
-import { getLoginData } from "./LoginData";
+import { getLoginData } from "./LoginService";
 
 const domain = process.env.REACT_APP_SERVER_DOMAIN;
 let suggestedPostsPrompt: string = '';

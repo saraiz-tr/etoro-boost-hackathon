@@ -2,7 +2,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import './EditPrompt.css';
 import { getUserPrompt, setSuggestedPostsPrompt } from '../../services/PostsService';
-import { isAuthenticated } from '../../services/LoginData';
+import { isAuthenticated } from '../../services/LoginService';
 import { useNavigate } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import ErrorDialog from '../ErrorDialogComponent/ErrorDialog';

@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../../styles/style.css';
 import { useNavigate } from 'react-router-dom';
-import { assertIsXLoggedin, asserteToroLoggedin, getIsXLoggedin, getLoginData, isAuthenticated, setLoginData } from '../../services/LoginData';
+import { eToroLogin, getIsXLoggedin, getLoginData, isAuthenticated } from '../../services/LoginService';
 
 export const Login = () => {
   const [showEtoroModal, setShowEtoroModal] = useState(false);
@@ -58,7 +58,16 @@ export const Login = () => {
         <div className="button-container">
           <Button 
             className="auth-button etoro-button"
-            onClick={() => setShowEtoroModal(true)}
+            //onClick={() => setShowEtoroModal(true)}
+            onClick={async () => {
+              const isSuccess = await eToroLogin();
+              if (isSuccess) {
+                setEtoroLoggedIn(true);
+                autoLogin();
+              } else {
+                // TBD: Show error message
+              }
+            }}
             disabled={loading}
           >
             <img src="https://etoro-cdn.etorostatic.com/web-client/et/img/etoro-boost/etoro-logo-small.svg"
@@ -91,15 +100,15 @@ export const Login = () => {
           </Button>
         </div>
 
-        <LoginModal 
+        {/* <LoginModal 
           show={showEtoroModal}
           onHide={() => setShowEtoroModal(false)}
           onLoginSuccess={(token: string, xCsrfToken: string, username: string) => {
-            setLoginData({ token, xCsrfToken, username });
+            setLoginData({ token, xCsrfToken, username, 0 });
             setEtoroLoggedIn(true);
             autoLogin();
           }}
-        />
+        /> */}
       </div>
     </div>
   );

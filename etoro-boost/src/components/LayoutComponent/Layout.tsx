@@ -2,7 +2,7 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import './Layout.css';
-import { logout } from '../../services/LoginData';
+import { logout } from '../../services/LoginService';
 //import Cookies from 'js-cookie';
 
 const Layout: React.FC = () => {
