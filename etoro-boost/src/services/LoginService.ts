@@ -97,7 +97,7 @@ export const initEToroLoginSdk = () => {
     {
       host: process.env.REACT_APP_ETORO_LOGIN_SDK_HOST,
       culture: 'en-gb',
-      appId: process.env.REACT_APP_APP_ID,
+      appId: process.env.REACT_APP_ETORO_BOOST_ID,
       version: '1.0',
       onUsernameUpdate: (username: string) => {
         setUsername(username);
