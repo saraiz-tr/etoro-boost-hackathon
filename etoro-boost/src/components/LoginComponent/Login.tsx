@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../../styles/style.css';
 import { useNavigate } from 'react-router-dom';
-import { eToroLogin, getIsXLoggedin, getLoginData, isAuthenticated } from '../../services/LoginService';
+import { eToroLogin, getIsXLoggedin, getLoginData, isAuthenticated, setLoginData } from '../../services/LoginService';
 
 export const Login = () => {
   const [showEtoroModal, setShowEtoroModal] = useState(false);

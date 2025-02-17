@@ -36,10 +36,10 @@ class XAIService {
       return response;
     } catch (error) {
       console.error(
-        "Azure OpenAI error:",
+        "X AI error:",
         error.response?.data || error.message
       );
-      throw new Error("Failed to get a response from Azure OpenAI");
+      throw new Error("Failed to get a response from X AI");
     }
   }
 }

@@ -92,6 +92,14 @@
     display: flex;
 }
 
+.green-checkbox:checked {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+.green-checkbox:hover {
+cursor: pointer;
+}
+
 @media (max-width: 576px) {
   .modal-dialog {
     max-width: 100%;

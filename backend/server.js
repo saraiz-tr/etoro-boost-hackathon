@@ -80,6 +80,10 @@ async function generatePostsByAI(content) {
     }
   } catch (e) {
     console.error("Failed to get suggested posts ", JSON.stringify(e));
+    throw {
+      status: 500,
+      message: e.message
+    };
   }
   return result;
 }
@@ -125,7 +129,7 @@ app.post("/api/postsOnEtoro", async (req, res) => {
     // }
     res.json({ result: result?.data?.data });
   } catch (e) {
-    res.json({ e });
+    res.status(e.status || 500).json({ e });
     console.error("Failed to post on eToro ", JSON.stringify(e));
   }
 });
@@ -140,7 +144,7 @@ app.post("/api/getSuggestedPosts", async (req, res) => {
     result = await generatePostsByAI(prompt);
   } catch (error) {
     console.error("Error in POST getSuggestedPosts:", error);
-    res.json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message });
     return;
   }
   res.json({ result });
@@ -198,7 +202,7 @@ app.get("/api/getSuggestedPosts", async (req, res) => {
     result = await generatePostsByAI(prompt);
   } catch (error) {
     console.error("Error connecting to Twitter API:", error);
-    res.json({ error: error.message });
+    res.status(error.status || 500).json({ error: error.message });
     return;
   }
   res.json({ result });

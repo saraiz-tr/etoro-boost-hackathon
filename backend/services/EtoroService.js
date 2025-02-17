@@ -34,7 +34,7 @@ class EtoroService {
   async getGCID(username) {
     try {
       const response = await axios.get(
-        `https://helpers.bullsheet.me/api/gcid?username=${username}`
+        `https://helpers.bullsheet.me/api/cid?username=${username}`
       );
       return response?.data?.gcid;
     } catch (error) {
@@ -61,9 +61,10 @@ class EtoroService {
   // Posts content to eToro feed
   async postOnEtoroFeedByLoginDetails(loginDetails, content) {
     try {
+      const clientRequestId = uuidv4();
       const gcid = await this.getGCID(loginDetails.userName);
       let body = this.generatePostBody(content, gcid);
-      const url = `${this.etoroApiUrl}api/feeds/v1/feed?path=discussion&subscription-key=${this.etoroApiKey}`;
+      const url = `${this.etoroApiUrl}api/feeds/v1/feed?path=discussion&subscription-key=${this.etoroApiKey}&client_request_id=${clientRequestId}`;
       const result = await axios.post(url, body, {
         headers: {
           "Ocp-Apim-Subscription-Key": this.etoroApiKey,
@@ -74,7 +75,10 @@ class EtoroService {
       return result;
     } catch (error) {
       console.error("Error posting on eToro feed: ", error);
-      return "failed";
+      throw {
+        status: 500,
+        message: error.message
+      };
     }
   }
 

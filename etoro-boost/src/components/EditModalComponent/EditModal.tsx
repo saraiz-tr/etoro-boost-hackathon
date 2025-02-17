@@ -13,9 +13,9 @@ interface EditModalProps {
   handlePost: () => void;
   handlePlatformSelect: (platform: string) => void;
   setSelectedTweet: (tweet: string) => void;
-  errorMessage: string | null; // Add error message prop
+  errorMessage: string | null;
   loading: boolean;
-}
+} 
 
 const EditModal: React.FC<EditModalProps> = ({
   showModal,
@@ -65,7 +65,36 @@ const EditModal: React.FC<EditModalProps> = ({
         />
         <hr />
         <h5 className="mt-2">Post in</h5>
+
         <div className="mb-3">
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input green-checkbox"
+              id="checkbox1"
+              checked={selectedPlatforms.includes('eToro')}
+              onChange={() => handlePlatformSelect('eToro')}
+            />
+            <label className="form-check-label" htmlFor="checkbox-etoro">
+              eToro
+            </label>
+          </div>
+          <div className="form-check">
+            <input
+              type="checkbox"
+              className="form-check-input green-checkbox"
+              id="checkbox2"
+              checked={selectedPlatforms.includes('X')}
+              onChange={() => handlePlatformSelect('X')}
+            />
+            <label className="form-check-label" htmlFor="checkbox-x">
+              X
+            </label>
+          </div>
+        </div>
+
+
+        {/* <div className="mb-3">
           <div className="buttons-container">
             <button
               type="submit"
@@ -96,7 +125,7 @@ const EditModal: React.FC<EditModalProps> = ({
               </div>
             </button>
           </div>
-        </div>
+        </div> */}
       </Modal.Body>
       <Modal.Footer className="desktop">
         <Button

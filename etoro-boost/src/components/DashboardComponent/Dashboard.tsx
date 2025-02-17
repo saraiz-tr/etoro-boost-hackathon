@@ -22,7 +22,6 @@ const DashboardComponent: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState(""); // Error message state
   const [modalErrorMessage, setModalErrorMessage] = useState<string | null>(null); // Modal error message state
   const navigate = useNavigate();
-  const domain = process.env.REACT_APP_SERVER_DOMAIN;
   const [postedTweets, setPostedTweets] = useState<number[]>([]);
   
   const loginData = getLoginData();
@@ -40,7 +39,6 @@ const DashboardComponent: React.FC = () => {
       setData(data.result); // Store the result in state
       setLoading(false); // Set loading to false after fetching data
     } catch (e) {
-      console.error("There was an error making the request!", e);
       setLoading(false); // Ensure loading state is updated on error
       setErrorMessage("There was an error fetching the suggested posts. Please try again later.");
       setShowErrorDialog(true);
@@ -65,7 +63,6 @@ const DashboardComponent: React.FC = () => {
   };
 
   const handlePost = async () => {
-    initializeEditPostDialog();
     setPostToNetworksloading(true);
 
     const isxSelected = selectedPlatforms.includes('X');
@@ -97,6 +94,7 @@ const DashboardComponent: React.FC = () => {
     if (errors.length > 0) {
       setModalErrorMessage(`Failed to post to: ${errors.join(', ')}. Please try again later.`);
     } else {
+      initializeEditPostDialog();
       setShowModal(false); // Close the modal
       setPostedTweets([...postedTweets, tweetIndex!]);
     }

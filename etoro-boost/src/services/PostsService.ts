@@ -4,7 +4,10 @@ const domain = process.env.REACT_APP_SERVER_DOMAIN;
 let suggestedPostsPrompt: string = '';
 
 export const fetchSuggestedPosts = async (username: string, prompt: string = '') => {
-  const response = prompt ? await generateWithPrompt(username, prompt) : await generateWithoutPrompt(username); 
+  const response = prompt ? await generateWithPrompt(username, prompt) : await generateWithoutPrompt(username);
+  if(!response.ok) {
+    throw new Error("Failed to fetch suggested posts");
+  }
   return response.json();
 };
 
@@ -17,7 +20,7 @@ export const getSuggestedPostsPrompt = () => {
 }
 
 export const postToX = async (post: any) => {
-  await fetch(`${domain}api/postOnX`, { 
+  const response = await fetch(`${domain}api/postOnX`, { 
     method: 'POST', 
     headers: {
       'Content-Type': 'application/json'
@@ -27,11 +30,15 @@ export const postToX = async (post: any) => {
     }),
     credentials: 'include'
   });
+  if(!response.ok) {
+    throw new Error("Failed to post to X");
+  }
+  return response.json();
 };
 
 export const postToEtoro = async (post: any, loginData: any) => {
   const username: string = loginData.username;
-  await fetch(`${domain}api/postsOnEtoro?username=${username}`, { 
+  const response = await fetch(`${domain}api/postsOnEtoro?username=${username}`, {
     method: 'POST', 
     headers: {
       'Content-Type': 'application/json',
@@ -43,6 +50,10 @@ export const postToEtoro = async (post: any, loginData: any) => {
     }),
     credentials: 'include'
   });
+  if(!response.ok) {
+    throw new Error("Failed to post to eToro");
+  }
+  return response.json();
 };
 
 export const getUserPrompt = async () => {

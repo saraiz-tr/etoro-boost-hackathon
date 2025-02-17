@@ -93,14 +93,14 @@ export const logout = async (isLogoutX: boolean = true) => {
 }
 
 export const initEToroLoginSdk = () => {
-  (window as any)["eToro"].init(
+  (window as any)["eToro"]?.init(
     {
       host: process.env.REACT_APP_ETORO_LOGIN_SDK_HOST,
       culture: 'en-gb',
       appId: process.env.REACT_APP_ETORO_BOOST_ID,
       version: '1.0',
-      onUsernameUpdate: (username: string) => {
-        setUsername(username);
+      onUsernameUpdate: (data: any) => {
+        setUsername(data.username);
       }
     });
     isEToroSdkInitialized = true;
@@ -112,8 +112,7 @@ export const eToroLogin = async (): Promise<boolean> => {
   }
   
   return new Promise((resolve, reject) => {
-    (window as any).eToro.login(["public_profile","personal_info"], (response: eToroLoginResponse)=>{
-      console.log(response);
+    (window as any).eToro?.login(["etoro_default"], (response: eToroLoginResponse)=>{
       if (response.status === eToroLoginStatus.Connected) {
         eToroLoginSdkSuccess(response);
         resolve(true);
@@ -125,11 +124,14 @@ export const eToroLogin = async (): Promise<boolean> => {
 }
 
 const eToroLogout = () => {
-  if (!isEToroSdkInitialized) {
-    initEToroLoginSdk();
+  try {
+    if (!isEToroSdkInitialized) {
+      initEToroLoginSdk();
+    }
+    (window as any).eToro?.logout(() => { });
+  } catch (error) {
+    console.error("eToro logout error:", error);
   }
-
-  (window as any).eToro.logout(() => { });
 }
 
 export const eToroLoginSdkSuccess = (data: eToroLoginResponse) => {
