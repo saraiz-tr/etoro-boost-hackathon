@@ -1,4 +1,5 @@
 import { eToroLoginResponse, eToroLoginStatus, LoginData } from "./Login.model";
+import { v4 as uuidv4 } from "uuid";
 
 let loginData: LoginData;
 let isXLoggedin: boolean | undefined;
@@ -40,7 +41,8 @@ export const isAuthenticated = async () => {
 
 export const assertIsXLoggedin = () => {
   let isLoggedIn = false;
-  return fetch(`${domain}auth/user`, {
+  const requestId = uuidv4(); 
+  return fetch(`${domain}auth/user?client_request_id=${requestId}`, {
     credentials: 'include'
   }).then(response => response.json()).then((response) => { 
     isLoggedIn = !response.error;
@@ -83,7 +85,8 @@ export const logout = async (isLogoutX: boolean = true) => {
   // X logout
   if (isLogoutX) {
     setXData(undefined);
-    await fetch(`${domain}api/logout`, {
+    const requestId = uuidv4(); 
+    await fetch(`${domain}api/logout?client_request_id=${requestId}`, {
       credentials: 'include'
     }).then(response => response.json())
     .catch((error) => {

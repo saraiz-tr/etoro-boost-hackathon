@@ -11,6 +11,7 @@ const EtoroService = require("./services/EtoroService");
 const XAIService = require("./services/XAIService");
 const dbService = require("./db/DBService");
 const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 
 const azureOpenAIService = new AzureOpenAIService();
 const eToroService = new EtoroService();
@@ -46,6 +47,14 @@ app.use( // TODO check without it
     cookie: { secure: false }, // Set to true in production for HTTPS
   })
 );
+app.use((req, res, next) => {
+  // Try to get request ID from query string
+  const clientRequestId = req.query['client_request_id'] || uuidv4();
+  // Attach it to the req object
+  req.clientRequestId = clientRequestId;
+  next();
+});
+
 app.use("/api", authRoutes);
 app.use("", xAuthRoutes);
 
@@ -115,6 +124,7 @@ app.post("/api/postsOnEtoro", async (req, res) => {
   try {
     const content = req.body.content;
     const result = await eToroService.postOnEtoroFeedByLoginDetails(
+      req.clientRequestId,
       loginDetails,
       content
     );

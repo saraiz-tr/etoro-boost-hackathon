@@ -1,4 +1,5 @@
 import { getLoginData } from "./LoginService";
+import { v4 as uuidv4 } from 'uuid';
 
 const domain = process.env.REACT_APP_SERVER_DOMAIN;
 let suggestedPostsPrompt: string = '';
@@ -20,7 +21,8 @@ export const getSuggestedPostsPrompt = () => {
 }
 
 export const postToX = async (post: any) => {
-  const response = await fetch(`${domain}api/postOnX`, { 
+  const requestId = uuidv4(); 
+  const response = await fetch(`${domain}api/postOnX?client_request_id=${requestId}`, { 
     method: 'POST', 
     headers: {
       'Content-Type': 'application/json'
@@ -38,7 +40,8 @@ export const postToX = async (post: any) => {
 
 export const postToEtoro = async (post: any, loginData: any) => {
   const username: string = loginData.username;
-  const response = await fetch(`${domain}api/postsOnEtoro?username=${username}`, {
+  const requestId = uuidv4();  // e.g., "
+  const response = await fetch(`${domain}api/postsOnEtoro?username=${username}&client_request_id=${requestId}`, {
     method: 'POST', 
     headers: {
       'Content-Type': 'application/json',
@@ -58,11 +61,12 @@ export const postToEtoro = async (post: any, loginData: any) => {
 
 export const getUserPrompt = async () => {
   const username: string = getLoginData()?.username;
+  const requestId = uuidv4(); 
   if (!username) {
     return {};
   }
 
-  const result = await fetch(`${domain}api/getSuggestedPostsPrompt?userName=${username}`, {
+  const result = await fetch(`${domain}api/getSuggestedPostsPrompt?userName=${username}&client_request_id=${requestId}`, {
     credentials: 'include'
   })
   return result.json();
@@ -70,13 +74,15 @@ export const getUserPrompt = async () => {
 
 // Private methods
 const generateWithoutPrompt = async (username: string) => {
-  return await fetch(`${domain}api/getSuggestedPosts?userName=${username}`, {
+  const requestId = uuidv4(); 
+  return await fetch(`${domain}api/getSuggestedPosts?userName=${username}&client_request_id=${requestId}`, {
     credentials: 'include'
   });
 }
 
 const generateWithPrompt = async (username: string, prompt: string) => {
-  return await fetch(`${domain}api/getSuggestedPosts?userName=${username}`,
+  const requestId = uuidv4(); 
+  return await fetch(`${domain}api/getSuggestedPosts?userName=${username}&client_request_id=${requestId}`,
     {
       method: 'POST',
       headers: {

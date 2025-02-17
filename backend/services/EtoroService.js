@@ -59,9 +59,8 @@ class EtoroService {
   }
 
   // Posts content to eToro feed
-  async postOnEtoroFeedByLoginDetails(loginDetails, content) {
+  async postOnEtoroFeedByLoginDetails(clientRequestId, loginDetails, content) {
     try {
-      const clientRequestId = uuidv4();
       const gcid = await this.getGCID(loginDetails.userName);
       let body = this.generatePostBody(content, gcid);
       const url = `${this.etoroApiUrl}api/feeds/v1/feed?path=discussion&subscription-key=${this.etoroApiKey}&client_request_id=${clientRequestId}`;
